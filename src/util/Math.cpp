@@ -223,18 +223,18 @@ std::vector<Math::Plane> Math::generatePlanes(const Line& ray)
     const int yDir{ int(displacement.y / abs(displacement.y)) };
     const int zDir{ int(displacement.z / abs(displacement.z)) };
 
-    for (int x = 0; x < displacement.x; ++x)
+    for (int x = 0; x < abs(displacement.x); ++x)
     {
         // x + 1 because we create the plane infront and in the direction of the vector
         const int planeValue{ (int)(((x + 1) * xDir) + ray.start.x) };
         planes.emplace_back(Plane{ Axis::X, planeValue });
     }
-    for (int y = 0; y < displacement.y; ++y)
+    for (int y = 0; y < abs(displacement.y); ++y)
     {
         const int planeValue{ (int)(((y + 1) * yDir) + ray.start.y) };
         planes.emplace_back(Plane{ Axis::Y, planeValue });
     }
-    for (int z = 0; z < displacement.z; ++z)
+    for (int z = 0; z < abs(displacement.z); ++z)
     {
         const int planeValue{ (int)(((z + 1) * zDir) + ray.start.z) };
         planes.emplace_back(Plane{ Axis::Z, planeValue });

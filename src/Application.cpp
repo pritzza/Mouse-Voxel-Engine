@@ -194,8 +194,6 @@ void Application::stop()
 
 void Application::initializeObjects()
 {
-    Math::test();
-
     // allocate gl objects now that everything is loaded
 	gl = std::make_unique<OpenGLStuff>();
 
@@ -217,7 +215,7 @@ void Application::initializeObjects()
 
     resMang.load("a", vs);
 
-    vs.setDimensions(dim * 8);
+    vs.setDimensions(dim * 4);
 
     resMang.load("b", vs);
 
@@ -439,6 +437,7 @@ void Application::update()
     resMang.load("a", vs);
 
     /// ray visual
+    // visualize player direction
     vs = resMang.getVoxelSpace("b");
 
     for (int i = 0; i < vs.getSize(); ++i)
@@ -446,18 +445,27 @@ void Application::update()
 
     const std::vector<Math::CubeIntersection> intersections{
         Math::getRayCubeIntersections(
-            glm::vec3{sin(currentTime), cos(currentTime), sin(currentTime * 2)},//camera.getForwardDirection(),   // ray dir
+            glm::vec3{sin(currentTime), cos(currentTime*2), sin(currentTime*3)},
+            //camera.getForwardDirection(),   // ray dir
             glm::vec3{ 0,0,0 },             // ray starting pos
-            16                               // ray cast distance
+            7                               // ray cast distance
         ) 
     };
 
-    const Voxel solid{ Voxel::ID::Solid, 1, 1, 1 };
-
     const glm::vec3 voxelPosOffset{ (vs.getDimensions() / 2) };
 
-    for (const Math::CubeIntersection& intersection : intersections)
-        vs.setVoxel(intersection.cubeCoords + voxelPosOffset, solid);
+    const int numIntersections = intersections.size();
+    
+    for (int i = 0; i < numIntersections; ++i)
+    {
+        const Math::CubeIntersection& intersection{ intersections[i] };
+
+        const float compColor{ static_cast<float>(i) / numIntersections };
+        
+        const Voxel v{ Voxel::ID::Solid, compColor, compColor, compColor };
+
+        vs.setVoxel(intersection.cubeCoords + voxelPosOffset, v);
+    }
 
     resMang.load("b", vs);
 
