@@ -20,4 +20,4 @@ Planned Features:
 - Greedy Meshing
 - Ambient Occlusion
 
-![Watch An Early Demo](https://www.youtube.com/watch?v=CbnBtSy00Q8)
+[Watch An Early Demo](https://www.youtube.com/watch?v=CbnBtSy00Q8)
