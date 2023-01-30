@@ -339,33 +339,39 @@ void Application::handleInput()
     if (glfwGetKey(glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(glfwWindow, true);
 
+    float moveSpeed{ 1.0f };
+    const float quickSpeedModifier{ 5.0f };
+
+    if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        moveSpeed *= quickSpeedModifier;
+
+    const float travelDistance = moveSpeed * deltaTime;
+
     if (glfwGetKey(glfwWindow, GLFW_KEY_S) == GLFW_PRESS)
-        camera.moveRelative(Camera::Direction::Backward, deltaTime);
+        camera.moveRelative(Camera::Direction::Backward, travelDistance);
     if (glfwGetKey(glfwWindow, GLFW_KEY_W) == GLFW_PRESS)
-        camera.moveRelative(Camera::Direction::Forward, deltaTime);
+        camera.moveRelative(Camera::Direction::Forward, travelDistance);
     if (glfwGetKey(glfwWindow, GLFW_KEY_A) == GLFW_PRESS)
-        camera.moveRelative(Camera::Direction::Left, deltaTime);
+        camera.moveRelative(Camera::Direction::Left, travelDistance);
     if (glfwGetKey(glfwWindow, GLFW_KEY_D) == GLFW_PRESS)
-        camera.moveRelative(Camera::Direction::Right, deltaTime);
+        camera.moveRelative(Camera::Direction::Right, travelDistance);
 
     if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camera.moveAbsolute(Math::J_HAT, deltaTime);
+        camera.moveAbsolute(Math::J_HAT, travelDistance);
     if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        camera.moveAbsolute(-Math::J_HAT, deltaTime);
+        camera.moveAbsolute(-Math::J_HAT, travelDistance);
+
+    const float rotationSpeed{ 1.f };
+    const float rotationAngle = rotationSpeed * deltaTime;
 
     if (glfwGetKey(glfwWindow, GLFW_KEY_UP) == GLFW_PRESS)
-        camera.setPitch(camera.getPitch() + deltaTime);
+        camera.setPitch(camera.getPitch() + rotationAngle);
     if (glfwGetKey(glfwWindow, GLFW_KEY_DOWN) == GLFW_PRESS)
-        camera.setPitch(camera.getPitch() - deltaTime);
+        camera.setPitch(camera.getPitch() - rotationAngle);
     if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT) == GLFW_PRESS)
-        camera.setYaw(camera.getYaw() - deltaTime);
+        camera.setYaw(camera.getYaw() - rotationAngle);
     if (glfwGetKey(glfwWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        camera.setYaw(camera.getYaw() + deltaTime);
-
-    if (glfwGetKey(glfwWindow, GLFW_KEY_E) == GLFW_PRESS)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    if (glfwGetKey(glfwWindow, GLFW_KEY_R) == GLFW_PRESS)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        camera.setYaw(camera.getYaw() + rotationAngle);
 
     if (glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS)
     {
