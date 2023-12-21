@@ -6,8 +6,8 @@
 
 #include "../gfx/gl/VAO.h"
 
-#include "../gfx/voxel/VoxelSpace.h"
-#include "../gfx/voxel/VoxelMeshGenerator.h"
+#include "../voxel/VoxelSpace.h"
+#include "../voxel/VoxelMeshGenerator.h"
 
 class ResourceManager
 {

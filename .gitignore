@@ -1,0 +1,14 @@
+# dependencies
+/deps
+
+# building
+/Debug
+/Release
+/x64
+
+# Visual Studio Project Files
+.vs/
+*.sln
+*.vcxproj
+*.filters
+*.user

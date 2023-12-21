@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 #include "GLTypeDefs.h"
 
@@ -25,6 +26,7 @@ public:
 	ShaderProgram() = default;
 	ShaderProgram(
 		const std::string_view& vertexShaderPath,
+		const std::optional<std::string_view>& geometryShaderPath,
 		const std::string_view& fragmentShaderPath,
 		const std::vector<std::string_view>& uniformNames
 	);
@@ -33,6 +35,7 @@ public:
 
 	void init(
 		const std::string_view& vertexShaderPath,
+		const std::optional<std::string_view>& geometryShaderPath,
 		const std::string_view& fragmentShaderPath,
 		const std::vector<std::string_view>& uniformNames
 	);
@@ -63,7 +66,7 @@ public:
 
 private:
 
-	void createProgram(GLuint vertex, GLuint fragment);
+	void createProgram(GLuint vertex, GLuint geometry, GLuint fragment);
 
 	const GLuint createShader(
 		GLuint shaderType, 

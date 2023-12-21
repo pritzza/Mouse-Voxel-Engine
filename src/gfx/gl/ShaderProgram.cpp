@@ -12,11 +12,17 @@
 
 ShaderProgram::ShaderProgram(
     const std::string_view& vertexShaderPath, 
+    const std::optional<std::string_view>& geometryShaderPath,
     const std::string_view& fragmentShaderPath, 
     const std::vector<std::string_view>& uniformNames
 )
 {
-    init(vertexShaderPath, fragmentShaderPath, uniformNames);
+    init(
+        vertexShaderPath, 
+        geometryShaderPath, 
+        fragmentShaderPath, 
+        uniformNames
+    );
 }
 
 ShaderProgram::~ShaderProgram()
@@ -26,6 +32,7 @@ ShaderProgram::~ShaderProgram()
 
 void ShaderProgram::init(
     const std::string_view& vertexShaderPath,
+    const std::optional<std::string_view>& geometryShaderPath,
     const std::string_view& fragmentShaderPath, 
     const std::vector<std::string_view>& uniformNames
 )
@@ -35,23 +42,42 @@ void ShaderProgram::init(
         vertexShaderPath
     ) };
 
+    GLuint geometryShader{ NULL_HANDLE };
+    
+    if (geometryShaderPath.has_value()) 
+    {
+        geometryShader = createShader(
+            GL_GEOMETRY_SHADER,
+            geometryShaderPath.value()
+        );
+    }
+
     const GLuint fragmentShader{ createShader(
         GL_FRAGMENT_SHADER,
         fragmentShaderPath
     ) };
 
+    const bool geometryShaderValidOrOmitted{
+        (geometryShaderPath.has_value() && geometryShader != NULL_HANDLE) ||
+        !geometryShaderPath.has_value()
+    };
+
     const bool shadersAreValid{
-        vertexShader   != NULL_HANDLE &&
-        fragmentShader != NULL_HANDLE
+        vertexShader    != NULL_HANDLE &&
+        fragmentShader  != NULL_HANDLE &&
+        geometryShaderValidOrOmitted
     };
 
     if (shadersAreValid)
     {
-        createProgram(vertexShader, fragmentShader);
+        createProgram(vertexShader, geometryShader, fragmentShader);
 
         // free shader resources
         glDeleteShader(vertexShader);
+        glDeleteShader(geometryShader);
         glDeleteShader(fragmentShader);
+
+        use();
 
         findUniforms(uniformNames);
     }
@@ -229,7 +255,7 @@ void ShaderProgram::findUniforms(const std::vector<std::string_view>& uniformNam
     }
 }
 
-void ShaderProgram::createProgram(const GLuint vertex, const GLuint fragment)
+void ShaderProgram::createProgram(const GLuint vertex, const GLuint geometry, const GLuint fragment)
 {
     // create program
     handle = glCreateProgram();
@@ -237,6 +263,9 @@ void ShaderProgram::createProgram(const GLuint vertex, const GLuint fragment)
     // attach shaders to program
     glAttachShader(handle, vertex);
     glAttachShader(handle, fragment);
+
+    if (geometry != NULL_HANDLE)
+        glAttachShader(handle, geometry);
 
     // link program
     glLinkProgram(handle);

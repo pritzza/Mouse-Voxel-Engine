@@ -13,7 +13,7 @@
 
 #include "gfx/Lighting.h"
 
-#include "gfx/voxel/VoxelMeshGenerator.h"
+#include "voxel/VoxelMeshGenerator.h"
 
 #include "util/ResourceManager.h"
 
@@ -63,7 +63,18 @@ public:
 		std::vector<ModelMatrix> pointMatrices;
 	};
 
+	struct OpenGLStuff2
+	{
+		VAO voxels;
+		ModelMatrix voxelsTransform;
+
+		ShaderProgram voxelProgram;
+	};
+
 	std::unique_ptr<OpenGLStuff> gl;
+	std::unique_ptr<OpenGLStuff2> gl2;
+
+	static constexpr bool USE_NEW_VOXELS{ true };
 
 private:
 	static constexpr int OPENGL_MAJOR_VERSION{ 3 };
