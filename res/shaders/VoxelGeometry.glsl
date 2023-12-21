@@ -13,7 +13,11 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 perspective;
 
-out vec4 fColor;
+out vec4 albedo;
+out vec3 normal;
+
+// todo: implement such that if dot(viewDir, normal) <= 0 then dont add primitive
+bool backFaceCull = true;
 
 vec4 cameraTransform(const vec3 pos)
 {
@@ -29,11 +33,15 @@ void makeTopFace(const vec3 p)
 		vec3(1.0, 1.0, 1.0)
 	);
 
+	normal = vec3(0.0, 1.0, 0.0);
+
 	for (int i = 0; i < 4; ++i) 
 	{
 		gl_Position = cameraTransform(p + vertices[i]);
 		EmitVertex();
 	}
+	
+	EndPrimitive();
 }
 
 void makeBottomFace(const vec3 p)
@@ -45,11 +53,15 @@ void makeBottomFace(const vec3 p)
 		vec3(1.0, 0.0, 1.0)
 	);
 
+	normal = vec3(0.0, -1.0, 0.0);
+
 	for (int i = 0; i < 4; ++i) 
 	{
 		gl_Position = cameraTransform(p + vertices[i]);
 		EmitVertex();
 	}
+
+	EndPrimitive();
 }
 
 void makeFrontFace(const vec3 p)
@@ -61,11 +73,15 @@ void makeFrontFace(const vec3 p)
 		vec3(1.0, 1.0, 1.0)
 	);
 
+	normal = vec3(0.0, 0.0, 1.0);
+
 	for (int i = 0; i < 4; ++i) 
 	{
 		gl_Position = cameraTransform(p + vertices[i]);
 		EmitVertex();
 	}
+
+	EndPrimitive();
 }
 
 void makeBackFace(const vec3 p)
@@ -77,11 +93,15 @@ void makeBackFace(const vec3 p)
 		vec3(1.0, 1.0, 0.0)
 	);
 
+	normal = vec3(0.0, 0.0, -1.0);
+
 	for (int i = 0; i < 4; ++i) 
 	{
 		gl_Position = cameraTransform(p + vertices[i]);
 		EmitVertex();
 	}
+
+	EndPrimitive();
 }
 
 void makeLeftFace(const vec3 p)
@@ -93,11 +113,15 @@ void makeLeftFace(const vec3 p)
 		vec3(0.0, 1.0, 1.0)
 	);
 
+	normal = vec3(-1.0, 0.0, 0.0);
+
 	for (int i = 0; i < 4; ++i) 
 	{
 		gl_Position = cameraTransform(p + vertices[i]);
 		EmitVertex();
 	}
+
+	EndPrimitive();
 }
 
 void makeRightFace(const vec3 p)
@@ -109,21 +133,23 @@ void makeRightFace(const vec3 p)
 		vec3(1.0, 1.0, 1.0)
 	);
 
+	normal = vec3(1.0, 0.0, 0.0);
+
 	for (int i = 0; i < 4; ++i) 
 	{
 		gl_Position = cameraTransform(p + vertices[i]);
 		EmitVertex();
 	}
+
+	EndPrimitive();
 }
 
-void makeFace()
+void makeVoxel()
 {
 	vec3 pos = vec3(gl_in[0].gl_Position);
 	int faces = inData[0].faces;
 
-	fColor = inData[0].color;
-
-	//makeFrontFace(pos + vec3(0.0, 0.0, faces));
+	albedo = inData[0].color;
 
 	bool addTop		= bool((1 << 0) & faces);
 	bool addBottom	= bool((1 << 1) & faces);
@@ -144,11 +170,9 @@ void makeFace()
 		makeLeftFace(pos);
 	if (addRight)
 		makeRightFace(pos);
-
-	EndPrimitive();
 }
 
 void main()
 {
-	makeFace();
+	makeVoxel();
 }

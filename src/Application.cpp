@@ -220,7 +220,7 @@ void Application::initializeObjects()
 
         resMang.load("b", vs);
 
-        gl->voxelChunkTransform.setPosition({ 0,0,2 });
+        gl->voxelChunkTransform.setPosition({ 0,-5,2 });
         gl->voxelChunkTransform.update();
 
         gl->rayIntersectionVisualTransform.setPosition({ -20,0,0 });
@@ -339,6 +339,12 @@ void Application::initializeObjects()
             Color color = { i / total , (i * 2 % (int)total) / total, (i * 3 % (int)total) / total, 1.f };
             VoxelFaces faces = { i };
 
+            voxelPos.push_back(pos);
+            voxelColor.push_back(color);
+            voxelFaces.push_back(faces);
+
+            pos.z += 5;
+            faces.faces = 0b111111;
             voxelPos.push_back(pos);
             voxelColor.push_back(color);
             voxelFaces.push_back(faces);
