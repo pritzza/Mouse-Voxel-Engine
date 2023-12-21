@@ -69,15 +69,27 @@ void VAO::defineAttribute(const std::vector<Attribute>& attributeData)
     vbos.emplace_back(VBO{ attributeData, GL_ARRAY_BUFFER });
     numVertices = attributeData.size();
 
-    glVertexAttribPointer(
-        Attribute::META.location,            // attribute location
-        Attribute::META.numElements,         // elements per attribute
-        Attribute::META.elementDataType,     // element data type
-        Attribute::META.shouldNormalize,     // normalized
-        sizeof(Attribute),                   // stride (in bytes)
-        0                                    // offset (in bytes)
-    );
-
+    if (Attribute::META.integerBased)
+    {
+        glVertexAttribIPointer(
+            Attribute::META.location,            // attribute location
+            Attribute::META.numElements,         // elements per attribute
+            Attribute::META.elementDataType,     // element data type
+            sizeof(Attribute),                   // stride (in bytes)
+            0                                    // offset (in bytes)
+        );
+    }
+    else
+    {
+        glVertexAttribPointer(
+            Attribute::META.location,            // attribute location
+            Attribute::META.numElements,         // elements per attribute
+            Attribute::META.elementDataType,     // element data type
+            Attribute::META.shouldNormalize,     // normalized
+            sizeof(Attribute),                   // stride (in bytes)
+            0                                    // offset (in bytes)
+        );
+    }
     // enable attribute (no reason not to if we defined an attribute)
     glEnableVertexAttribArray(Attribute::META.location);
 }

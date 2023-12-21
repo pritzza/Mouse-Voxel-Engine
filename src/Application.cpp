@@ -220,7 +220,7 @@ void Application::initializeObjects()
 
         resMang.load("b", vs);
 
-        gl->voxelChunkTransform.setPosition({ 0,0,0 });
+        gl->voxelChunkTransform.setPosition({ 0,0,2 });
         gl->voxelChunkTransform.update();
 
         gl->rayIntersectionVisualTransform.setPosition({ -20,0,0 });
@@ -326,15 +326,27 @@ void Application::initializeObjects()
         // allocate gl objects now that everything is loaded
         gl2 = std::make_unique<OpenGLStuff2>();
 
-        const std::vector<Position> voxelPos{
-            {0.0f, 0.0f, 0.f},
-            {2.0f, 0.0f, 0.f},
-            {0.0f, -2.0f, 0.f},
-            {1.0f, -2.0f, 0.f},
-            {2.0f, -2.0f, 0.f},
-        };
+        std::vector<Position> voxelPos;
+        std::vector<Color> voxelColor;
+        std::vector<VoxelFaces> voxelFaces;
+
+        const float total = std::pow(6, 2);
+        for (int i = 0; i < total; ++i) 
+        {
+            const int x = i % 6;
+            const int y = i / 6;
+            Position pos = { 2.f * x, 2.f * y, 0.f };
+            Color color = { i / total , (i * 2 % (int)total) / total, (i * 3 % (int)total) / total, 1.f };
+            VoxelFaces faces = { i };
+
+            voxelPos.push_back(pos);
+            voxelColor.push_back(color);
+            voxelFaces.push_back(faces);
+        }
 
         gl2->voxels.defineAttribute(voxelPos);
+        gl2->voxels.defineAttribute(voxelColor);
+        gl2->voxels.defineAttribute(voxelFaces);
 
         gl2->voxelsTransform.setPosition({ 0,0,0 });
         gl2->voxelsTransform.update();
