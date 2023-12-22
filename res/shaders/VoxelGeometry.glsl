@@ -13,11 +13,22 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 perspective;
 
+uniform vec3 viewPosition;
+
 out vec4 albedo;
 out vec3 normal;
 
-// todo: implement such that if dot(viewDir, normal) <= 0 then dont add primitive
 bool backFaceCull = true;
+
+bool shouldCull(const vec3 normal, const vec3 faceOffset)
+{
+	vec3 voxelPos = vec3(gl_in[0].gl_Position);
+	
+	vec3 facePos = vec3(model * vec4(voxelPos + faceOffset, 1.0));
+	vec3 viewDir = normalize(viewPosition - facePos);
+
+	return dot(viewDir, normal) <= 0;
+}
 
 vec4 cameraTransform(const vec3 pos)
 {
@@ -34,6 +45,9 @@ void makeTopFace(const vec3 p)
 	);
 
 	normal = vec3(0.0, 1.0, 0.0);
+
+	if (shouldCull(normal, vertices[0]))
+		return;
 
 	for (int i = 0; i < 4; ++i) 
 	{
@@ -54,6 +68,9 @@ void makeBottomFace(const vec3 p)
 	);
 
 	normal = vec3(0.0, -1.0, 0.0);
+	
+	if (shouldCull(normal, vertices[0]))
+		return;
 
 	for (int i = 0; i < 4; ++i) 
 	{
@@ -74,6 +91,9 @@ void makeFrontFace(const vec3 p)
 	);
 
 	normal = vec3(0.0, 0.0, 1.0);
+	
+	if (shouldCull(normal, vertices[0]))
+		return;
 
 	for (int i = 0; i < 4; ++i) 
 	{
@@ -94,6 +114,9 @@ void makeBackFace(const vec3 p)
 	);
 
 	normal = vec3(0.0, 0.0, -1.0);
+	
+	if (shouldCull(normal, vertices[0]))
+		return;
 
 	for (int i = 0; i < 4; ++i) 
 	{
@@ -114,6 +137,9 @@ void makeLeftFace(const vec3 p)
 	);
 
 	normal = vec3(-1.0, 0.0, 0.0);
+	
+	if (shouldCull(normal, vertices[0]))
+		return;
 
 	for (int i = 0; i < 4; ++i) 
 	{
@@ -134,6 +160,9 @@ void makeRightFace(const vec3 p)
 	);
 
 	normal = vec3(1.0, 0.0, 0.0);
+	
+	if (shouldCull(normal, vertices[0]))
+		return;
 
 	for (int i = 0; i < 4; ++i) 
 	{

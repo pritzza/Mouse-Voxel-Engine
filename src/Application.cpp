@@ -371,6 +371,8 @@ void Application::initializeObjects()
         };
 
         const std::vector<std::string_view> VOXEL_PROGRAM_UNIFORM_NAMES = {
+            UNIFORM_VIEW_POSITION,
+
             // camera transform
             UNIFORM_MODEL_MAT,
             UNIFORM_VIEW_MAT,
@@ -718,6 +720,11 @@ void Application::update()
     if (USE_NEW_VOXELS)
     {
         gl2->voxelProgram.use();
+
+        gl2->voxelProgram.setUniformVec3f(
+            UNIFORM_VIEW_POSITION,
+            camera.getPosition()
+        );
 
         gl2->voxelProgram.setUniformMat4(
             UNIFORM_MODEL_MAT,
