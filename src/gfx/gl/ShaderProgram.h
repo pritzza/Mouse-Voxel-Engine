@@ -40,10 +40,10 @@ public:
 		const std::vector<std::string_view>& uniformNames
 	);
 
-	void setUniformf(const std::string_view& name, float value);
-	void setUniformi(const std::string_view& name, int value);
-	void setUniformVec3f(const std::string_view& name, const glm::vec3& v);
-	void setUniformMat4(const std::string_view& name, const glm::mat4& matrix);
+	void setUniformf(const std::string_view& name, float value) const;
+	void setUniformi(const std::string_view& name, int value) const;
+	void setUniformVec3f(const std::string_view& name, const glm::vec3& v) const;
+	void setUniformMat4(const std::string_view& name, const glm::mat4& matrix) const;
 
 	void setUniformMaterial(
 		const std::string_view& shininess,
@@ -51,16 +51,16 @@ public:
 		const std::string_view& diffuse,
 		const std::string_view& specular,
 		const Material& mat
-	);
+	) const;
 	void setUniformLight(
 		const std::string_view& position,
 		const std::string_view& ambient,
 		const std::string_view& diffuse,
 		const std::string_view& specular, 
 		const Light& light
-	);
+	) const;
 
-	void use();
+	void use() const;
 
 	const GLuint get() const;
 

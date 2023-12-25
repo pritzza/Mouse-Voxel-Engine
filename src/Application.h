@@ -17,6 +17,10 @@
 
 #include "util/ResourceManager.h"
 
+#include "VoxelGrid.h"
+
+#include "VoxelModel.h"
+
 class Application
 {
 public:
@@ -66,7 +70,13 @@ public:
 	struct OpenGLStuff2
 	{
 		VAO voxels;
+		VAO moreVoxels;
+		std::shared_ptr<VoxelGrid> voxelGrid;
+
+		VoxelModel vm;
+
 		ModelMatrix voxelsTransform;
+		ModelMatrix moreVoxelsTransform;
 
 		ShaderProgram voxelProgram;
 	};
@@ -75,6 +85,7 @@ public:
 	std::unique_ptr<OpenGLStuff2> gl2;
 
 	static constexpr bool USE_NEW_VOXELS{ true };
+	static constexpr bool USE_OLD_VOXELS{ true };
 
 private:
 	static constexpr int OPENGL_MAJOR_VERSION{ 3 };

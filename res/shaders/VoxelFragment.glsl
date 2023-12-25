@@ -5,6 +5,12 @@ in vec3 normal;
 
 out vec4 FragColor;
 
+// todo: add ambient occlusion
+// idea: CPU side, every voxel stores bitwise whether all the pixels
+//		 surrounding it are transparent (0) or opaque (1).
+//		 GPU takes this and can compute which faces of each voxel
+//		 are visible, normals, and ambient occlusion from it
+
 void main()
 {
 	vec4 lightColor = vec4(1.0);

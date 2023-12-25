@@ -87,17 +87,17 @@ void ShaderProgram::init(
     }
 }
 
-void ShaderProgram::setUniformf(const std::string_view& name, float value)
+void ShaderProgram::setUniformf(const std::string_view& name, float value) const
 {
     glUniform1f(uniforms.at(name), value);
 }
 
-void ShaderProgram::setUniformi(const std::string_view& name, int value)
+void ShaderProgram::setUniformi(const std::string_view& name, int value) const
 {
     glUniform1i(uniforms.at(name), value);
 }
 
-void ShaderProgram::setUniformVec3f(const std::string_view& name, const glm::vec3& v)
+void ShaderProgram::setUniformVec3f(const std::string_view& name, const glm::vec3& v) const
 {
     glUniform3fv(uniforms.at(name), 1, &v[0]);
 }
@@ -105,7 +105,7 @@ void ShaderProgram::setUniformVec3f(const std::string_view& name, const glm::vec
 void ShaderProgram::setUniformMat4(
     const std::string_view& name, 
     const glm::mat4& matrix
-)
+) const
 {
     glUniformMatrix4fv(uniforms.at(name), 1, GL_FALSE, glm::value_ptr(matrix));
 }
@@ -116,7 +116,7 @@ void ShaderProgram::setUniformMaterial(
     const std::string_view& diffuse,
     const std::string_view& specular,
     const Material& material
-)
+) const
 {
     // todo: there's no way i know of doing this, but need to somehow
     // statically assert that names of Material members line up with
@@ -134,7 +134,7 @@ void ShaderProgram::setUniformLight(
     const std::string_view& diffuse,
     const std::string_view& specular,
     const Light& light
-)
+) const
 {
     // todo: there's no way i know of doing this, but need to somehow
     // statically assert that names of Material members line up with
@@ -146,7 +146,7 @@ void ShaderProgram::setUniformLight(
     glUniform3fv(uniforms.at(specular), 1,  &light.specularColor[0]);
 }
 
-void ShaderProgram::use()
+void ShaderProgram::use() const
 {
     glUseProgram(handle);
 }

@@ -54,14 +54,14 @@ struct Normal
     GLfloat x, y, z;
 };
 
-struct VoxelFaces
+struct SurroundingVoxels
 {
     static constexpr VertexAttributeInfo META
     {
         4, 1, GL_INT, GL_FALSE, true
     };
 
-    GLint faces;
+    GLint surrounding;
 };
 
 // compile time sanity check to make sure no attirbutes have the same location
@@ -69,7 +69,7 @@ static_assert(
     Position::META.location != Color::META.location &&
     Color::META.location != TextureCoordinate2D::META.location &&
     TextureCoordinate2D::META.location != Normal::META.location &&
-    Normal::META.location != VoxelFaces::META.location
+    Normal::META.location != SurroundingVoxels::META.location
 );
 
 struct Vertex

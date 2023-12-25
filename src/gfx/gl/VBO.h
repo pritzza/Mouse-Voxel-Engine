@@ -23,6 +23,9 @@ public:
 
 	void bind() const;
 
+	template<typename T>
+	void updateBuffer(int newDataStart, const std::vector<T>& vertices);
+
 	GLuint getHandle() const { return handle; }
 
 private:
@@ -56,5 +59,18 @@ inline void VBO::bufferData(const std::vector<T>& vertices)
 		vertices.size() * sizeof(T),    // size (in bytes)
 		vertices.data(),                // data
 		GL_STATIC_DRAW                  // usage
+	);
+}
+
+template<typename T>
+inline void VBO::updateBuffer(int newDataStart, const std::vector<T>& newVertices)
+{
+	bind();
+
+	glBufferSubData(
+		GL_ARRAY_BUFFER,//targetBuffer,                   // target buffer
+		newDataStart,					// offset start of new data into old buffer
+		newVertices.size() * sizeof(T), // size (in bytes)
+		newVertices.data()              // data
 	);
 }

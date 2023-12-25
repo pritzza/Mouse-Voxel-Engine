@@ -4,6 +4,8 @@
 #include <cmath>
 #include <iostream>
 
+inline static std::mt19937 mt;
+
 char Math::toChar(Axis axis)
 {
     switch (axis)
@@ -330,4 +332,62 @@ void Math::test()
 
         interpretIntersection(intersection);
     }
+}
+
+int Math::toIndex(const glm::ivec3& coord, const glm::ivec3& dim)
+{
+    return coord.x + (coord.y * dim.x) + (coord.z * dim.y * dim.x);
+}
+
+glm::ivec3 Math::toCoord(int index, const glm::ivec3& dim)
+{
+    const int x{ index % dim.x };
+    const int y{ (index / dim.x) % dim.y };
+    const int z{ index / (dim.x * dim.y) };
+    return glm::ivec3{ x, y, z };
+}
+
+bool Math::isInside(int val, int lower, int upper)
+{
+    return lower <= val && val < upper;
+}
+
+bool Math::isInside(const glm::ivec3& coord, const glm::ivec3& bounds)
+{
+    return isInside(coord, glm::ivec3{ 0 }, bounds);
+}
+
+bool Math::isInside(
+    const glm::ivec3& coord, 
+    const glm::ivec3& lower, 
+    const glm::ivec3& upper
+)
+{
+    return isInside(coord.x, lower.x, upper.x) &&
+           isInside(coord.y, lower.y, upper.y) &&
+           isInside(coord.z, lower.z, upper.z);
+}
+
+std::array<glm::ivec3, 27> Math::getCubeSurroundingCoords()
+{
+    std::array<glm::ivec3, 27> surroundingOffsets;
+
+    const glm::ivec3 surroundingDim{ glm::ivec3{ 3, 3, 3 } };
+
+    for (int i = 0; i < 27; ++i)
+        surroundingOffsets[i] = Math::toCoord(i, surroundingDim) - glm::ivec3{ 1 };
+
+    return surroundingOffsets;
+}
+
+void Math::seed_rng(int seed)
+{
+    mt.seed(seed);
+}
+
+// return uniformly random int between [min, max)
+int Math::rng(int min, int max)
+{
+    std::uniform_int_distribution<int> dist(min, max - 1);
+    return dist(mt);
 }

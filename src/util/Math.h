@@ -1,6 +1,8 @@
 #pragma once
 
+#include <array>
 #include <optional>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -105,5 +107,32 @@ namespace Math
     );
 
     void test();
+
+
+
+    int toIndex(const glm::ivec3& coord, const glm::ivec3& dim);
+
+    glm::ivec3 toCoord(int index, const glm::ivec3& dim);
+
+    // returns if val in [lower, upper)
+    bool isInside(int val, int lower, int upper);
+
+    // returns if coord >= 0 and cord < bounds
+    bool isInside(const glm::ivec3& coord, const glm::ivec3& bounds);
+
+    // returns if val in [lower, upper) for each coordinate
+    bool isInside(
+        const glm::ivec3& coord, 
+        const glm::ivec3& lower, 
+        const glm::ivec3& upper
+    );
+
+    // todo: make constexpr
+    std::array<glm::ivec3, 27> getCubeSurroundingCoords();
+
+    void seed_rng(int seed);
+
+    // return uniformly random int between [min, max)
+    int rng(int min, int max);
 
 };

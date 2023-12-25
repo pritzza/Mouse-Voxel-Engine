@@ -18,8 +18,11 @@ public:
     
 	const T& get(int index) const;
 	const T& get(const glm::ivec3& coord) const;
-	const std::optional<T>& getSafe(int index) const;
-	const std::optional<T>& getSafe(const glm::ivec3& coord) const;
+	const T* const getSafe(int index) const;
+	const T* const getSafe(const glm::ivec3& coord) const;
+
+	const std::vector<const T*> get(const std::vector<glm::ivec3>& coords) const;
+	const std::vector<const T*> get(const std::vector<int>& indices) const;
 
 	// returns true if success
 	bool set(const glm::ivec3 coord, const T& val);
@@ -54,7 +57,7 @@ public:
 	//	 X
 	// 
 	// returns strictly adjacent cells
-	std::vector<T> getAdjacent(const glm::ivec3& coord) const;
+	std::vector<const T*> getAdjacent(const glm::ivec3& coord) const;
 	std::vector<glm::ivec3> getAdjacentCoords(const glm::ivec3& coord) const;
 
 	// Surrounding cells of O:
@@ -63,8 +66,18 @@ public:
 	//	XXX
 	//
 	// returns all cells around coord
-	std::vector<T> getSurrounding(const glm::ivec3& coord) const;
+	std::vector<const T*> getSurrounding(const glm::ivec3& coord) const;
 	std::vector<glm::ivec3> getSurroundingCoords(const glm::ivec3& coord) const;
+
+	int getSize() const
+	{
+		return size;
+	}
+
+	const std::vector<T>& getData() const 
+	{
+		return cells;
+	}
 
 };
 

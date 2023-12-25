@@ -14,6 +14,8 @@
 
 #include "gfx/Materials.h"
 
+#include "VoxelGrid.h"
+
 // cube
 static const std::vector<Position> cubePosVertices = {
 
@@ -299,7 +301,7 @@ void Application::initializeObjects()
         const float FOV{ glm::radians(45.f) };
         const float ASPECT_RATIO{ (float)window.getWidth() / window.getHeight() };
         const float NEAR_PLANE{ 0.1f };
-        const float FAR_PLANE{ 100.0f };
+        const float FAR_PLANE{ 1000.0f };
 
         camera.setProjectionMatrix(FOV, ASPECT_RATIO, NEAR_PLANE, FAR_PLANE);
 
@@ -318,43 +320,68 @@ void Application::initializeObjects()
         gl->light.ambientColor = glm::vec3{ 0.1f };
     }
 
-
-
     // new voxel stuff
     if (USE_NEW_VOXELS)
     {
         // allocate gl objects now that everything is loaded
         gl2 = std::make_unique<OpenGLStuff2>();
 
+        gl2->voxelGrid = std::make_shared<VoxelGrid>(glm::ivec3{32,32,32});
+
+        VoxelGrid& vg = *gl2->voxelGrid.get();
+        const glm::ivec3& dim = vg.getDim();;
+        const float size = vg.getSize();
+        for (int i = 0; i < size; ++i)
+        {
+            Color color = { i / size , (i * 2 % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
+            VoxelNew voxel{ VoxelNew::ID::Filled, color, 0 };
+            vg.set(i, voxel);
+        }
+
+        gl2->vm.create(gl2->voxelGrid);
+
+        gl2->moreVoxels.defineAttribute(vg.getPositionData());
+        gl2->moreVoxels.defineAttribute(vg.getGraphicsData());
+        gl2->moreVoxels.defineAttribute(vg.getSurroundingData());
+
+        gl2->moreVoxelsTransform.setPosition({ -10,-50,0 });
+        gl2->moreVoxelsTransform.update();
+
+
+
+
         std::vector<Position> voxelPos;
         std::vector<Color> voxelColor;
-        std::vector<VoxelFaces> voxelFaces;
+        std::vector<SurroundingVoxels> voxelFaces;
 
-        const float total = std::pow(6, 2);
-        for (int i = 0; i < total; ++i) 
+        const float total = 64*64*64;//std::pow(2, 27);
+        const glm::ivec3 d{ 64, 64, 64 };
+        for (int i = 0; i < total; i++) 
         {
-            const int x = i % 6;
-            const int y = i / 6;
-            Position pos = { 2.f * x, 2.f * y, 0.f };
+            const glm::ivec3 c = Math::toCoord(i, d);
+            Position pos = { 2.f * c.x, 2.f * c.y, 2.f * c.z };
             Color color = { i / total , (i * 2 % (int)total) / total, (i * 3 % (int)total) / total, 1.f };
-            VoxelFaces faces = { i };
+            SurroundingVoxels faces = { i };
 
             voxelPos.push_back(pos);
             voxelColor.push_back(color);
             voxelFaces.push_back(faces);
 
-            pos.z += 5;
-            faces.faces = 0b111111;
-            voxelPos.push_back(pos);
-            voxelColor.push_back(color);
-            voxelFaces.push_back(faces);
+            //pos.z *= -1;
+            //faces.surrounding = VoxelNew::CenterCenterCenter;
+            //voxelPos.push_back(pos);
+            //voxelColor.push_back(color);
+            //voxelFaces.push_back(faces);
         }
 
         gl2->voxels.defineAttribute(voxelPos);
         gl2->voxels.defineAttribute(voxelColor);
         gl2->voxels.defineAttribute(voxelFaces);
 
-        gl2->voxelsTransform.setPosition({ 0,0,0 });
+        gl2->vm.modelMatrix.setPosition({ 10,0,0 });
+        gl2->vm.modelMatrix.update();
+
+        gl2->voxelsTransform.setPosition({ 100,0,0 });
         gl2->voxelsTransform.update();
 
         //// shader stuff
@@ -487,66 +514,69 @@ void Application::update()
         stop();
 
     {
-        //std::cout << "dt: " << deltaTime << '\n';
-
-        // voxel stuff
-        VoxelSpace vs{ resMang.getVoxelSpace("a") };
-
-        static int index{ 0 };
-        index++;
-
-        const int voxelIndex{ index % vs.getSize() };
-
-        const Voxel currentVoxel{ vs.getVoxel(voxelIndex) };
-
-        // next voxel is inverse of current voxel
-        Voxel::ID nextVoxelID{
-            currentVoxel.id == Voxel::ID::Solid ? Voxel::ID::Empty : Voxel::ID::Solid
-        };
-
-        const Voxel nextVoxel{
-            nextVoxelID,
-            (std::sinf(currentTime * 3) / 2.f) + 0.5f,
-            (std::sinf(currentTime * 5) / 2.f) + 0.5f,
-            (std::sinf(currentTime * 7) / 2.f) + 0.5f
-        };
-
-        vs.setVoxel(voxelIndex, nextVoxel);
-
-        resMang.load("a", vs);
-
-        /// ray visual
-        // visualize player direction
-        vs = resMang.getVoxelSpace("b");
-
-        for (int i = 0; i < vs.getSize(); ++i)
-            vs.setVoxel(i, Voxel{ Voxel::ID::Empty, 1, 1, 1 });
-
-        const std::vector<Math::CubeIntersection> intersections{
-            Math::getRayCubeIntersections(
-                glm::vec3{sin(currentTime), cos(currentTime * 2), sin(currentTime * 3)},
-                //camera.getForwardDirection(),   // ray dir
-                glm::vec3{ 0,0,0 },             // ray starting pos
-                7                               // ray cast distance
-            )
-        };
-
-        const glm::vec3 voxelPosOffset{ (vs.getDimensions() / 2) };
-
-        const int numIntersections = intersections.size();
-
-        for (int i = 0; i < numIntersections; ++i)
+        if (USE_OLD_VOXELS)
         {
-            const Math::CubeIntersection& intersection{ intersections[i] };
+            //std::cout << "dt: " << deltaTime << '\n';
 
-            const float compColor{ static_cast<float>(i) / numIntersections };
+            // voxel stuff
+            VoxelSpace vs{ resMang.getVoxelSpace("a") };
 
-            const Voxel v{ Voxel::ID::Solid, compColor, compColor, compColor };
+            static int index{ 0 };
+            index++;
 
-            vs.setVoxel(intersection.cubeCoords + voxelPosOffset, v);
+            const int voxelIndex{ index % vs.getSize() };
+
+            const Voxel currentVoxel{ vs.getVoxel(voxelIndex) };
+
+            // next voxel is inverse of current voxel
+            Voxel::ID nextVoxelID{
+                currentVoxel.id == Voxel::ID::Solid ? Voxel::ID::Empty : Voxel::ID::Solid
+            };
+
+            const Voxel nextVoxel{
+                nextVoxelID,
+                (std::sinf(currentTime * 3) / 2.f) + 0.5f,
+                (std::sinf(currentTime * 5) / 2.f) + 0.5f,
+                (std::sinf(currentTime * 7) / 2.f) + 0.5f
+            };
+
+            vs.setVoxel(voxelIndex, nextVoxel);
+
+            resMang.load("a", vs);
+
+            /// ray visual
+            // visualize player direction
+            vs = resMang.getVoxelSpace("b");
+
+            for (int i = 0; i < vs.getSize(); ++i)
+                vs.setVoxel(i, Voxel{ Voxel::ID::Empty, 1, 1, 1 });
+
+            const std::vector<Math::CubeIntersection> intersections{
+                Math::getRayCubeIntersections(
+                    glm::vec3{sin(currentTime), cos(currentTime * 2), sin(currentTime * 3)},
+                    //camera.getForwardDirection(),   // ray dir
+                    glm::vec3{ 0,0,0 },             // ray starting pos
+                    7                               // ray cast distance
+                )
+            };
+
+            const glm::vec3 voxelPosOffset{ (vs.getDimensions() / 2) };
+
+            const int numIntersections = intersections.size();
+
+            for (int i = 0; i < numIntersections; ++i)
+            {
+                const Math::CubeIntersection& intersection{ intersections[i] };
+
+                const float compColor{ static_cast<float>(i) / numIntersections };
+
+                const Voxel v{ Voxel::ID::Solid, compColor, compColor, compColor };
+
+                vs.setVoxel(intersection.cubeCoords + voxelPosOffset, v);
+            }
+
+            resMang.load("b", vs);
         }
-
-        resMang.load("b", vs);
 
         // update camera matrix
         camera.update();
@@ -574,151 +604,191 @@ void Application::update()
 
         /// rendering light source
 
-        // activate shader
-        gl->lightSourceProgram.use();
-
-        /// update all uniforms (CAMERA TRANSFORM and light color)
-        // camera transform
-        gl->lightSourceProgram.setUniformMat4(
-            UNIFORM_MODEL_MAT,
-            gl->lightSourceTransform.getMatrix()
-        );
-        gl->lightSourceProgram.setUniformMat4(
-            UNIFORM_VIEW_MAT,
-            camera.getViewMatrix()
-        );
-        gl->lightSourceProgram.setUniformMat4(
-            UNIFORM_PERSPECTIVE_MAT,
-            camera.getProjectionMatrix()
-        );
-
-        // lighting stuff
-        gl->lightSourceProgram.setUniformVec3f(
-            UNIFORM_LIGHT_COLOR,
-            gl->light.diffuseColor
-        );
-
-        // bind light source VAO
-        gl->lightSourceCube.bind();
-
-        // draw light source
-        glDrawArrays(GL_TRIANGLES, 0, cubePosVertices.size());
-
-
-        /// rendering object
-
-        // activate object shader
-        gl->objectProgram.use();
-
-        const int cubesLength{ 1 };
-        for (int i = 0; i < cubesLength * cubesLength; ++i)
+        if (USE_OLD_VOXELS)
         {
-            const float xPos = (i % cubesLength) - (cubesLength / 2.f);
-            const float yPos = (i / cubesLength) - (cubesLength / 2.f);
-            const float zPos = sqrt(pow(xPos, 2) + pow(yPos, 2)) + cubesLength / 2.f;
+            // activate shader
+            gl->lightSourceProgram.use();
 
-            const glm::vec3 lightPos{ gl->lightSourceTransform.getPosition() };
-
-            gl->objectTransform.setPosition({
-                xPos,
-                yPos + lightPos.y,
-                zPos
-                });
-
-            gl->objectTransform.update();
-
-            // setting object material based on index
-            static constexpr int NUM_MATERIALS{ static_cast<int>(Materials::ID::SIZE) };
-            Materials::ID matID{ static_cast<Materials::ID>(i % NUM_MATERIALS) };
-
-            if (i == 0)
-                matID = Materials::ID::Pearl;
-
-            gl->objectMaterial = Materials::MATERIALS.getVal(matID);
-
-
-            /// update all uniforms:
-            /// camera transform, view position, light, and object material
-
+            /// update all uniforms (CAMERA TRANSFORM and light color)
             // camera transform
-            gl->objectProgram.setUniformMat4(
+            gl->lightSourceProgram.setUniformMat4(
                 UNIFORM_MODEL_MAT,
-                gl->objectTransform.getMatrix()
+                gl->lightSourceTransform.getMatrix()
             );
-            gl->objectProgram.setUniformMat4(
+            gl->lightSourceProgram.setUniformMat4(
                 UNIFORM_VIEW_MAT,
                 camera.getViewMatrix()
             );
-            gl->objectProgram.setUniformMat4(
+            gl->lightSourceProgram.setUniformMat4(
                 UNIFORM_PERSPECTIVE_MAT,
                 camera.getProjectionMatrix()
             );
 
-            // lighting stuff (view position, light, object material)
-            gl->objectProgram.setUniformVec3f(
-                UNIFORM_VIEW_POSITION,
-                camera.getPosition()
+            // lighting stuff
+            gl->lightSourceProgram.setUniformVec3f(
+                UNIFORM_LIGHT_COLOR,
+                gl->light.diffuseColor
             );
 
-            gl->objectProgram.setUniformLight(
-                UNIFORM_LIGHT_POSITION,
-                UNIFORM_LIGHT_AMBIENT,
-                UNIFORM_LIGHT_DIFFUSE,
-                UNIFORM_LIGHT_SPECULAR,
-                gl->light
-            );
+            // bind light source VAO
+            gl->lightSourceCube.bind();
 
-            gl->objectProgram.setUniformMaterial(
-                UNIFORM_MATERIAL_SHININESS,
-                UNIFORM_MATERIAL_AMBIENT,
-                UNIFORM_MATERIAL_DIFFUSE,
-                UNIFORM_MATERIAL_SPECULAR,
-                gl->objectMaterial
-            );
-
-            // bind object VAO
-            gl->objectCube.bind();
-
-            // draw object
+            // draw light source
             glDrawArrays(GL_TRIANGLES, 0, cubePosVertices.size());
-        }
 
-        for (const ModelMatrix& pointMatrix : gl->pointMatrices)
-        {
+
+            /// rendering object
+
+            // activate object shader
+            gl->objectProgram.use();
+
+            const int cubesLength{ 1 };
+            for (int i = 0; i < cubesLength * cubesLength; ++i)
+            {
+                const float xPos = (i % cubesLength) - (cubesLength / 2.f);
+                const float yPos = (i / cubesLength) - (cubesLength / 2.f);
+                const float zPos = sqrt(pow(xPos, 2) + pow(yPos, 2)) + cubesLength / 2.f;
+
+                const glm::vec3 lightPos{ gl->lightSourceTransform.getPosition() };
+
+                gl->objectTransform.setPosition({
+                    xPos,
+                    yPos + lightPos.y,
+                    zPos
+                    });
+
+                gl->objectTransform.update();
+
+                // setting object material based on index
+                static constexpr int NUM_MATERIALS{ static_cast<int>(Materials::ID::SIZE) };
+                Materials::ID matID{ static_cast<Materials::ID>(i % NUM_MATERIALS) };
+
+                if (i == 0)
+                    matID = Materials::ID::Pearl;
+
+                gl->objectMaterial = Materials::MATERIALS.getVal(matID);
+
+
+                /// update all uniforms:
+                /// camera transform, view position, light, and object material
+
+                // camera transform
+                gl->objectProgram.setUniformMat4(
+                    UNIFORM_MODEL_MAT,
+                    gl->objectTransform.getMatrix()
+                );
+                gl->objectProgram.setUniformMat4(
+                    UNIFORM_VIEW_MAT,
+                    camera.getViewMatrix()
+                );
+                gl->objectProgram.setUniformMat4(
+                    UNIFORM_PERSPECTIVE_MAT,
+                    camera.getProjectionMatrix()
+                );
+
+                // lighting stuff (view position, light, object material)
+                gl->objectProgram.setUniformVec3f(
+                    UNIFORM_VIEW_POSITION,
+                    camera.getPosition()
+                );
+
+                gl->objectProgram.setUniformLight(
+                    UNIFORM_LIGHT_POSITION,
+                    UNIFORM_LIGHT_AMBIENT,
+                    UNIFORM_LIGHT_DIFFUSE,
+                    UNIFORM_LIGHT_SPECULAR,
+                    gl->light
+                );
+
+                gl->objectProgram.setUniformMaterial(
+                    UNIFORM_MATERIAL_SHININESS,
+                    UNIFORM_MATERIAL_AMBIENT,
+                    UNIFORM_MATERIAL_DIFFUSE,
+                    UNIFORM_MATERIAL_SPECULAR,
+                    gl->objectMaterial
+                );
+
+                // bind object VAO
+                gl->objectCube.bind();
+
+                // draw object
+                glDrawArrays(GL_TRIANGLES, 0, cubePosVertices.size());
+            }
+
+            for (const ModelMatrix& pointMatrix : gl->pointMatrices)
+            {
+                gl->objectProgram.setUniformMat4(
+                    UNIFORM_MODEL_MAT,
+                    pointMatrix.getMatrix()
+                );
+
+                gl->objectCube.bind();
+
+                glDrawArrays(GL_TRIANGLES, 0, cubePosVertices.size());
+            }
+
             gl->objectProgram.setUniformMat4(
                 UNIFORM_MODEL_MAT,
-                pointMatrix.getMatrix()
+                gl->voxelChunkTransform.getMatrix()
             );
 
-            gl->objectCube.bind();
+            const VAO& voxelVAO{ resMang.getVoxelMeshVAO("a") };
+            voxelVAO.bind();
 
-            glDrawArrays(GL_TRIANGLES, 0, cubePosVertices.size());
+            glDrawArrays(GL_TRIANGLES, 0, voxelVAO.getNumVertices());
+
+            gl->objectProgram.setUniformMat4(
+                UNIFORM_MODEL_MAT,
+                gl->rayIntersectionVisualTransform.getMatrix()
+            );
+
+            const VAO& rayIntersectionVisualVAO{ resMang.getVoxelMeshVAO("b") };
+            rayIntersectionVisualVAO.bind();
+
+            glDrawArrays(GL_TRIANGLES, 0, rayIntersectionVisualVAO.getNumVertices());
         }
-
-        gl->objectProgram.setUniformMat4(
-            UNIFORM_MODEL_MAT,
-            gl->voxelChunkTransform.getMatrix()
-        );
-
-        const VAO& voxelVAO{ resMang.getVoxelMeshVAO("a") };
-        voxelVAO.bind();
-
-        glDrawArrays(GL_TRIANGLES, 0, voxelVAO.getNumVertices());
-
-        gl->objectProgram.setUniformMat4(
-            UNIFORM_MODEL_MAT,
-            gl->rayIntersectionVisualTransform.getMatrix()
-        );
-
-        const VAO& rayIntersectionVisualVAO{ resMang.getVoxelMeshVAO("b") };
-        rayIntersectionVisualVAO.bind();
-
-        glDrawArrays(GL_TRIANGLES, 0, rayIntersectionVisualVAO.getNumVertices());
 
     }
 
     if (USE_NEW_VOXELS)
     {
+        VoxelGrid& vg = *gl2->voxelGrid.get();
+        const glm::ivec3& dim = vg.getDim();;
+        const float size = vg.getSize();
+        const int t = currentTime * 10;
+
+        if (currentTime > 3)
+        {
+            //// make 2 random voxels empty
+            for (int i = 0; i < 2; ++i)
+            {
+                const int randomIndex = Math::rng(0, size);
+                //vg.setID(randomIndex, VoxelNew::ID::Null);
+                VoxelNew v{ VoxelNew::ID::Null, Color(.5,.5,.5,1), 0 };
+                vg.set(randomIndex, v);
+            }
+
+            // make 1 rancom voxel filled
+            for (int i = 0; i < 1; ++i)
+            {
+                const int randomIndex = Math::rng(0, size);
+                VoxelNew v{ VoxelNew::ID::Filled, Color(1,1,1,1), 0 };
+                vg.set(randomIndex, v);
+                //vg.setID(randomIndex, VoxelNew::ID::Filled);
+                //Color color = { i / size , (i * t % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
+                //vg.setGraphic(randomIndex, color);
+            }
+        }
+
+        //for (int i = 0; i < size; ++i)
+        //{
+        //    Color color = { i / size , (i * t % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
+        //    VoxelNew voxel{ VoxelNew::ID::Filled, color, 0 };
+        //    vg.set(i, voxel);
+        //}
+
+        gl2->vm.updateBuffers();
+
         gl2->voxelProgram.use();
 
         gl2->voxelProgram.setUniformVec3f(
@@ -740,8 +810,18 @@ void Application::update()
         );
         
         gl2->voxels.bind();
-
         glDrawArrays(GL_POINTS, 0, gl2->voxels.getNumVertices());
+
+
+        gl2->voxelProgram.setUniformMat4(
+            UNIFORM_MODEL_MAT,
+            gl2->moreVoxelsTransform.getMatrix()
+        );
+
+        gl2->moreVoxels.bind();
+        glDrawArrays(GL_POINTS, 0, gl2->moreVoxels.getNumVertices());
+
+        gl2->vm.render(gl2->voxelProgram);
     }
 }
 
