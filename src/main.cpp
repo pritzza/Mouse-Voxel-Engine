@@ -4,7 +4,7 @@ int main()
 {
     Application::instantiateLibraries();
 
-    Application application{ "Finally", 800, 600 };
+    Application application{ "Mouse Voxel Engine", 1920 >> 1, 1080 >> 1 };
 
     application.start();
 

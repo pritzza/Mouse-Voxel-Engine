@@ -39,19 +39,6 @@ Window::Window(
 	// bind opengl context to window
 	glfwMakeContextCurrent(window);
 
-
-	// todo: see if can get working
-	//const bool gladHasLoaded{ gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) };
-	//if (!gladHasLoaded)
-	//{
-	//	std::cerr << "Error! Tried to set viewport before loading GLAD!\n";
-	//	assert(false);
-	//}
-	// set view port to window dimensions
-	//glViewport(0, 0, width, height);
-	
-
-
 	setCallbacks();
 }
 

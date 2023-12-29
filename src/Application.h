@@ -13,13 +13,14 @@
 
 #include "gfx/Lighting.h"
 
-#include "voxel/VoxelMeshGenerator.h"
-
 #include "util/ResourceManager.h"
 
 #include "VoxelGrid.h"
 
 #include "VoxelModel.h"
+#include "voxel/VoxelShader.h"
+#include "gfx/VoxelRenderer.h"
+#include "gfx/VoxelObject.h"
 
 class Application
 {
@@ -48,83 +49,29 @@ public:
 
 	ResourceManager resMang;
 
-	struct OpenGLStuff
-	{
-		ModelMatrix voxelChunkTransform;
-		ModelMatrix rayIntersectionVisualTransform;
-
-		VAO lightSourceCube;
-		ModelMatrix lightSourceTransform;
-		Light light;
-
-		VAO objectCube;
-		ModelMatrix objectTransform;
-		Material objectMaterial;
-
-		ShaderProgram lightSourceProgram;
-		ShaderProgram objectProgram;
-
-		std::vector<ModelMatrix> pointMatrices;
-	};
-
 	struct OpenGLStuff2
 	{
-		VAO voxels;
-		VAO moreVoxels;
-		std::shared_ptr<VoxelGrid> voxelGrid;
+		std::shared_ptr<VoxelGrid> grid;
+		std::shared_ptr<VoxelModel> model;
 
-		VoxelModel vm;
+		VoxelObject object;
 
-		ModelMatrix voxelsTransform;
-		ModelMatrix moreVoxelsTransform;
+		VoxelShader shader;
 
-		ShaderProgram voxelProgram;
+		VoxelRenderer renderer;
 	};
 
-	std::unique_ptr<OpenGLStuff> gl;
-	std::unique_ptr<OpenGLStuff2> gl2;
-
-	static constexpr bool USE_NEW_VOXELS{ true };
-	static constexpr bool USE_OLD_VOXELS{ true };
+	std::unique_ptr<OpenGLStuff2> gl;
 
 private:
 	static constexpr int OPENGL_MAJOR_VERSION{ 3 };
 	static constexpr int OPENGL_MINOR_VERSION{ 3 };
 	static constexpr int OPENGL_PROFILE{ GLFW_OPENGL_CORE_PROFILE };
 
-	// todo: find better place for this
-	/// uniform names lol
-	// from goofing around
-	static constexpr std::string_view UNIFORM_TIME{ "time" };
-
-	// textures
-	static constexpr std::string_view UNIFORM_TEXTURE0{ "texture0" };
-	static constexpr std::string_view UNIFORM_TEXTURE1{ "texture1" };
-
-	// camera transform
-	static constexpr std::string_view UNIFORM_MODEL_MAT{ "model" };
-	static constexpr std::string_view UNIFORM_VIEW_MAT{ "view" };
-	static constexpr std::string_view UNIFORM_PERSPECTIVE_MAT{ "perspective" };
-
-	// from Lighting: Colors
-	static constexpr std::string_view UNIFORM_LIGHT_COLOR{ "lightColor" };	// keep for light source shader
-
-	// from Lighting: Basic Lighting
-	static constexpr std::string_view UNIFORM_VIEW_POSITION{ "viewPosition" };
-
-	// from Lighting: Materials
-	static constexpr std::string_view UNIFORM_MATERIAL{ "material" };
-	static constexpr std::string_view UNIFORM_MATERIAL_AMBIENT{ "material.ambientColor" };
-	static constexpr std::string_view UNIFORM_MATERIAL_DIFFUSE{ "material.diffuseColor" };
-	static constexpr std::string_view UNIFORM_MATERIAL_SPECULAR{ "material.specularColor" };
-	static constexpr std::string_view UNIFORM_MATERIAL_SHININESS{ "material.shininess" };
-
-	static constexpr std::string_view UNIFORM_LIGHT{ "light" };
-	static constexpr std::string_view UNIFORM_LIGHT_POSITION{ "light.position" };
-	static constexpr std::string_view UNIFORM_LIGHT_AMBIENT{ "light.ambientColor" };
-	static constexpr std::string_view UNIFORM_LIGHT_DIFFUSE{ "light.diffuseColor" };
-	static constexpr std::string_view UNIFORM_LIGHT_SPECULAR{ "light.specularColor" };
-
+	const float FOV_DEG{ 90.f };
+	float ASPECT_RATIO{ 1.f };
+	const float NEAR_PLANE{ 0.1f };
+	const float FAR_PLANE{ 1000.0f };
 
 private:
 	void initializeObjects();
@@ -135,7 +82,7 @@ private:
 	void update();
 	void display();
 
-	// static methods for library initilization and configureation
+	// static methods for library initialization and configuration
 private:
 	static inline bool isInstantiated{ false };
 

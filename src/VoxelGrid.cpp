@@ -12,7 +12,7 @@ VoxelGrid::VoxelGrid(const glm::ivec3 dim)
 	setPositions();
 }
 
-bool VoxelGrid::set(const glm::ivec3& coord, const VoxelNew& voxel)
+bool VoxelGrid::set(const glm::ivec3& coord, const Voxel& voxel)
 {
 	if (Math::isInside(coord, dim))
 	{
@@ -23,7 +23,7 @@ bool VoxelGrid::set(const glm::ivec3& coord, const VoxelNew& voxel)
 	return false;
 }
 
-bool VoxelGrid::set(int index, const VoxelNew& voxel)
+bool VoxelGrid::set(int index, const Voxel& voxel)
 {
 	if (!Math::isInside(index, 0, size))
 		return false;
@@ -44,7 +44,7 @@ bool VoxelGrid::set(int index, const VoxelNew& voxel)
 	return worked;
 }
 
-bool VoxelGrid::setID(int index, VoxelNew::ID id)
+bool VoxelGrid::setID(int index, Voxel::ID id)
 {
 	const bool worked = voxels.set(index, id);
 
@@ -59,12 +59,12 @@ bool VoxelGrid::setGraphic(int index, const Color& color)
 	return voxelGraphics.set(index, color);
 }
 
-VoxelNew VoxelGrid::get(int index) const
+Voxel VoxelGrid::get(int index) const
 {
-	VoxelNew::ID id = voxels.get(index);
+	Voxel::ID id = voxels.get(index);
 	SurroundingVoxels surrounding = surroundingVoxels.get(index);
 	Color color = voxelGraphics.get(index);
-	return VoxelNew(id, color, surrounding.surrounding);
+	return Voxel(id, color, surrounding.surrounding);
 }
 
 void VoxelGrid::update()
@@ -104,7 +104,7 @@ void VoxelGrid::updateSurrounding(const glm::ivec3& coord)
 		if (!Math::isInside(coord + surroundingOffset, dim))
 			continue;
 
-		bool bit{ voxels.get(coord) == VoxelNew::ID::Filled };
+		bool bit{ voxels.get(coord) == Voxel::ID::Filled };
 		setSurroundingBit(bit, surroundingOffset, coord);
 	}
 }

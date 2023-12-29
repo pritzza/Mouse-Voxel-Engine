@@ -12,12 +12,12 @@ class VoxelGrid
 public:
 	VoxelGrid(const glm::ivec3 dim);
 
-	bool set(const glm::ivec3& coord, const VoxelNew& voxel);
-	bool set(int index, const VoxelNew& voxel);
-	bool setID(int index, VoxelNew::ID id);
+	bool set(const glm::ivec3& coord, const Voxel& voxel);
+	bool set(int index, const Voxel& voxel);
+	bool setID(int index, Voxel::ID id);
 	bool setGraphic(int index, const Color& color);
 
-	VoxelNew get(int index) const;
+	Voxel get(int index) const;
 
 	// call this after making changes
 	void update();
@@ -26,18 +26,11 @@ public:
 	const std::vector<Position>& getPositionData() const;
 	const std::vector<SurroundingVoxels>& getSurroundingData() const;
 
-	const glm::ivec3& getDim() const 
-	{ 
-		return dim; 
-	}
-
-	int getSize() const
-	{
-		return size;
-	}
+	const glm::ivec3& getDim() const { return dim; }
+	int getSize() const { return size; }
 
 private:
-	Grid<VoxelNew::ID> voxels;
+	Grid<Voxel::ID> voxels;
 	Grid<Color> voxelGraphics;
 	Grid<Position> voxelPositions;
 	Grid<SurroundingVoxels> surroundingVoxels;
@@ -60,8 +53,8 @@ private:
 	void uploadEverythingToGPU() const;
 
 private:
-	static constexpr VoxelNew::ID		DEFAULT_VOXEL_ID{ VoxelNew::ID::Null };
+	static constexpr Voxel::ID		DEFAULT_VOXEL_ID{ Voxel::ID::Null };
 	static constexpr Color				DEFAULT_VOXEL_GRAPHIC{ 1.f, 1.f, 1.f, 1.f };
 	static constexpr Position			DEFAULT_VOXEL_POSITION{ 0.f,0.f,0.f };
-	static constexpr SurroundingVoxels	DEFAULT_VOXEL_SURROUNDINGS{ VoxelNew::Surrounding::Primary };
+	static constexpr SurroundingVoxels	DEFAULT_VOXEL_SURROUNDINGS{ Voxel::Surrounding::Primary };
 };

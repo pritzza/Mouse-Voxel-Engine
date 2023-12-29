@@ -61,6 +61,7 @@ public:
 	) const;
 
 	void use() const;
+	void unuse() const;	// great name lol
 
 	const GLuint get() const;
 

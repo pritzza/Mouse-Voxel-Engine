@@ -151,6 +151,11 @@ void ShaderProgram::use() const
     glUseProgram(handle);
 }
 
+void ShaderProgram::unuse() const
+{
+    glUseProgram(0);
+}
+
 const GLuint ShaderProgram::get() const
 {
     if (handle == NULL_HANDLE)

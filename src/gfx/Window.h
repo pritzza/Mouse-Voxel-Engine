@@ -27,6 +27,7 @@ public:
 	GLFWwindow* const getWindowPtr() const { return window; }
 	int getWidth() const	{ return width;  }
 	int getHeight() const	{ return height; }
+	float getAspectRatio() const { return (float)width / height; }
 
 private:
 	GLFWwindow* window;

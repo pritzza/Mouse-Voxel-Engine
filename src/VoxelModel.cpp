@@ -1,6 +1,6 @@
 #include "VoxelModel.h"
 
-#include "gfx/gl/ShaderProgram.h"
+#include "voxel/VoxelShader.h"
 
 VoxelModel::VoxelModel(const std::shared_ptr<VoxelGrid>& voxels)
 {
@@ -13,7 +13,7 @@ void VoxelModel::create(const std::shared_ptr<VoxelGrid>& voxels)
 
 	vao.bind();
 
-	VoxelGrid vg{ *voxelGrid.get() };
+	VoxelGrid& vg{ *voxelGrid.get() };
 
 	vao.defineAttribute(vg.getPositionData());
 	vao.defineAttribute(vg.getGraphicsData());
@@ -23,29 +23,35 @@ void VoxelModel::create(const std::shared_ptr<VoxelGrid>& voxels)
 	graphicsDataBuffer = &vao.getVBOs().at(1);
 	surroundingDataBuffer = &vao.getVBOs().at(2);
 
-	created = true;
+	instantiated = true;
 }
 
-void VoxelModel::render(const ShaderProgram& voxelShader) const
+void VoxelModel::updateBuffers()
 {
-	assert(created);
-
-	voxelShader.use();
-
-	voxelShader.setUniformMat4("model", modelMatrix.getMatrix());
-
-	vao.bind();
-	glDrawArrays(GL_POINTS, 0, vao.getNumVertices());
-}
-
-void VoxelModel::updateBuffers() const
-{
-	assert(created);
+	assert(instantiated);
 
 	vao.bind();
 
 	VoxelGrid vg{ *voxelGrid.get() };
 
-	graphicsDataBuffer->updateBuffer(0, vg.getGraphicsData());
-	surroundingDataBuffer->updateBuffer(0, vg.getSurroundingData());
+	// TODO
+	isPositionDataStale = true;
+	isGraphicsDataStale = true;
+	isSurroundingDataStale = true;
+
+	if (isGraphicsDataStale)
+	{
+		graphicsDataBuffer->updateBuffer(0, vg.getGraphicsData());
+		isGraphicsDataStale = false;
+	}
+	if (isSurroundingDataStale)
+	{
+		surroundingDataBuffer->updateBuffer(0, vg.getSurroundingData());
+		isSurroundingDataStale = false;
+	}
+	if (isPositionDataStale)
+	{
+		positionDataBuffer->updateBuffer(0, vg.getPositionData());
+		isSurroundingDataStale = false;
+	}
 }

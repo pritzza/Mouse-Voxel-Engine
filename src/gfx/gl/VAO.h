@@ -29,6 +29,7 @@ public:
     void defineIBO(const std::vector<GLuint>& indices);
 
     void bind() const { glBindVertexArray(handle); }
+    void unbind() const { glBindVertexArray(0); }
 
     // getters
     GLuint getHandle() const        { return handle;            }
