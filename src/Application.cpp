@@ -191,6 +191,24 @@ void Application::handleInput()
 
         //gl->pointMatrices.push_back(m);
     }
+
+    // mouse
+    const glm::ivec2 windowDim{ window.getWidth(), window.getHeight() };
+
+    // mouse position from center of window within interval [-1, 1]
+    static glm::dvec2 prevMousePos{ 0.0, 0.0 };
+    static glm::dvec2 curMousePos{ 0.0, 0.0 };
+
+    prevMousePos = curMousePos;
+    glfwGetCursorPos(window.getWindowPtr(), &curMousePos.x, &curMousePos.y);
+    
+    const glm::dvec2 deltaMousePos{ prevMousePos - curMousePos };
+    
+    static constexpr double MOUSE_SENSITIVITY{ 1/128.0 };
+    const glm::dvec2 pan{ deltaMousePos * MOUSE_SENSITIVITY };
+
+    camera.setPitch(std::clamp(camera.getPitch() + pan.y, glm::radians(-89.9), glm::radians(89.9)));
+    camera.setYaw(camera.getYaw() - pan.x);
 }
 
 void Application::update()
