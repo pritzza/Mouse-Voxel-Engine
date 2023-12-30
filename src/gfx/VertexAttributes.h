@@ -22,6 +22,15 @@ struct Position
     };
 
     GLfloat x, y, z;
+
+    bool operator==(const Position& o) const 
+    {
+        return x == o.x && y == o.y && z == o.z;
+    }
+    bool operator!=(const Position& o) const
+    {
+        return !(*this == o);
+    }
 };
 
 struct Color
@@ -32,6 +41,14 @@ struct Color
     };
 
     GLfloat r, g, b, a;
+    bool operator==(const Color& o) const
+    {
+        return r == o.r && g == o.g && b == o.b && a == o.a;
+    }
+    bool operator!=(const Color& o) const
+    {
+        return !(*this == o);
+    }
 };
 
 struct TextureCoordinate2D
@@ -62,6 +79,14 @@ struct SurroundingVoxels
     };
 
     GLint surrounding;
+    bool operator==(const SurroundingVoxels& o) const
+    {
+        return surrounding == o.surrounding;
+    }
+    bool operator!=(const SurroundingVoxels& o) const
+    {
+        return !(*this == o);
+    }
 };
 
 // compile time sanity check to make sure no attirbutes have the same location

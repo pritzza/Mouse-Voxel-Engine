@@ -15,7 +15,10 @@ public:
 	VoxelModel(const std::shared_ptr<VoxelGrid>& voxels);
 
 	void create(const std::shared_ptr<VoxelGrid>& voxels);
-	void updateBuffers();
+	
+	// calling this will update the VAO/VBOs of the model to be
+	// up to date with the data of the underlying voxelGrid
+	void syncToGrid();
 
 	const VAO& getVAO() const { return vao; }
 	bool isInstanciated() const { return instantiated; }
@@ -31,4 +34,7 @@ private:
 	bool isGraphicsDataStale{ false };
 	bool isPositionDataStale{ false };
 	bool isSurroundingDataStale{ false };
+
+private:
+	void updateBuffers();
 };

@@ -26,18 +26,24 @@ void VoxelModel::create(const std::shared_ptr<VoxelGrid>& voxels)
 	instantiated = true;
 }
 
+void VoxelModel::syncToGrid()
+{
+	VoxelGrid& vg{ *voxelGrid.get() };
+
+	isPositionDataStale = vg.wasPositionDataAltered();
+	isGraphicsDataStale = vg.wasGraphicsDataAltered();
+	isSurroundingDataStale = vg.wasSurroundingDataAltered();
+	
+	updateBuffers();
+}
+
 void VoxelModel::updateBuffers()
 {
 	assert(instantiated);
 
 	vao.bind();
 
-	VoxelGrid vg{ *voxelGrid.get() };
-
-	// TODO
-	isPositionDataStale = true;
-	isGraphicsDataStale = true;
-	isSurroundingDataStale = true;
+	VoxelGrid& vg{ *voxelGrid.get() };
 
 	if (isGraphicsDataStale)
 	{

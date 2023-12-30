@@ -28,20 +28,31 @@ bool VoxelGrid::set(int index, const Voxel& voxel)
 	if (!Math::isInside(index, 0, size))
 		return false;
 
-	bool isDifferentID{ voxel.id == voxels.get(index) };
-
+	const bool isDifferentID{ voxel.id != voxels.get(index) };
 	const bool worked{ voxels.set(index, voxel.id) };
 
 	if (worked)
 	{
+		// set graphic regardless of ID
 		voxelGraphics.set(index, voxel.graphic);
 
 		// dont need to update surrounding if only graphical change
-		//if (isDifferentID)
+		if (isDifferentID)
 			updateSurrounding(index);
 	}
 
 	return worked;
+}
+
+bool VoxelGrid::setID(const glm::ivec3& coord, Voxel::ID id)
+{
+	if (Math::isInside(coord, dim))
+	{
+		const int index{ Math::toIndex(coord, dim) };
+		return setID(index, id);
+	}
+
+	return false;
 }
 
 bool VoxelGrid::setID(int index, Voxel::ID id)
@@ -52,6 +63,17 @@ bool VoxelGrid::setID(int index, Voxel::ID id)
 		updateSurrounding(index);
 
 	return worked;
+}
+
+bool VoxelGrid::setGraphic(const glm::ivec3& coord, const Color& color)
+{
+	if (Math::isInside(coord, dim))
+	{
+		const int index{ Math::toIndex(coord, dim) };
+		return setGraphic(index, color);
+	}
+
+	return false;
 }
 
 bool VoxelGrid::setGraphic(int index, const Color& color)
@@ -67,9 +89,41 @@ Voxel VoxelGrid::get(int index) const
 	return Voxel(id, color, surrounding.surrounding);
 }
 
-void VoxelGrid::update()
+bool VoxelGrid::wasGraphicsDataAltered() const
 {
+	return voxelGraphics.wasAltered();
+}
 
+bool VoxelGrid::wasPositionDataAltered() const
+{
+	return voxelPositions.wasAltered();
+}
+
+bool VoxelGrid::wasSurroundingDataAltered() const
+{
+	return surroundingVoxels.wasAltered();
+}
+
+void VoxelGrid::ammendAlterations()
+{
+	ammendGraphicsDataAlterations();
+	ammendPositionDataAlterations();
+	ammendSurroundingDataAlterations();
+}
+
+void VoxelGrid::ammendGraphicsDataAlterations()
+{
+	voxelGraphics.ammendAlterations();
+}
+
+void VoxelGrid::ammendPositionDataAlterations()
+{
+	voxelPositions.ammendAlterations();
+}
+
+void VoxelGrid::ammendSurroundingDataAlterations()
+{
+	surroundingVoxels.ammendAlterations();
 }
 
 const std::vector<Color>& VoxelGrid::getGraphicsData() const

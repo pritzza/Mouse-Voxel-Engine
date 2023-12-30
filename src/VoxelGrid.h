@@ -2,8 +2,6 @@
 
 #include "Grid.h"
 
-#include <glm/vec4.hpp>
-
 #include "voxel/Voxel.h"
 #include "gfx/VertexAttributes.h"
 
@@ -12,15 +10,27 @@ class VoxelGrid
 public:
 	VoxelGrid(const glm::ivec3 dim);
 
+	// todo: 
+	// optimization can be writing a function for setting many things at once
+
 	bool set(const glm::ivec3& coord, const Voxel& voxel);
 	bool set(int index, const Voxel& voxel);
+	bool setID(const glm::ivec3& coord, Voxel::ID id);
 	bool setID(int index, Voxel::ID id);
+	bool setGraphic(const glm::ivec3& coord, const Color& color);
 	bool setGraphic(int index, const Color& color);
 
 	Voxel get(int index) const;
+	
+	// Should call this before potentially changing
+	// voxels to check if any changes were made.
+	// If this isn't called code still works but then data for 
+	// voxel model will be uploaded every syncToGrid() call
+	void ammendAlterations();
 
-	// call this after making changes
-	void update();
+	bool wasGraphicsDataAltered() const;
+	bool wasPositionDataAltered() const;
+	bool wasSurroundingDataAltered() const;
 
 	const std::vector<Color>& getGraphicsData() const;
 	const std::vector<Position>& getPositionData() const;
@@ -37,8 +47,6 @@ private:
 	const glm::ivec3 dim;
 	const int size;
 
-	bool perpetuallyUpdate{ true };
-
 private:
 	void setPositions();
 	void updateSurrounding(const glm::ivec3& coord);
@@ -50,10 +58,12 @@ private:
 		const glm::ivec3& center
 	);
 
-	void uploadEverythingToGPU() const;
+	void ammendGraphicsDataAlterations();
+	void ammendPositionDataAlterations();
+	void ammendSurroundingDataAlterations();
 
 private:
-	static constexpr Voxel::ID		DEFAULT_VOXEL_ID{ Voxel::ID::Null };
+	static constexpr Voxel::ID			DEFAULT_VOXEL_ID{ Voxel::ID::Null };
 	static constexpr Color				DEFAULT_VOXEL_GRAPHIC{ 1.f, 1.f, 1.f, 1.f };
 	static constexpr Position			DEFAULT_VOXEL_POSITION{ 0.f,0.f,0.f };
 	static constexpr SurroundingVoxels	DEFAULT_VOXEL_SURROUNDINGS{ Voxel::Surrounding::Primary };

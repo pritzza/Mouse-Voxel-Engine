@@ -8,11 +8,6 @@
 template <typename T>
 class Grid 
 {
-	const glm::ivec3 dim;
-	const int size;
-	const T nullValue;
-	std::vector<T> cells;
-
 public:
 	Grid(const glm::ivec3& dim, const T& nullValue);
     
@@ -69,6 +64,18 @@ public:
 	std::vector<const T*> getSurrounding(const glm::ivec3& coord) const;
 	std::vector<glm::ivec3> getSurroundingCoords(const glm::ivec3& coord) const;
 
+	// returns if the grid was ever changed since the last time
+	// a modification was acknowledged.
+	// Basically tells you if a new cell was ever overwritten
+	// Initial State:	X X
+	// Second State:	X X -> not altered	(After writing X to [1])
+	// Third State:		X O -> altered		(After writing O to [1])
+	// Fourth State:	X X -> altered		(After writing X to [1])
+	bool wasAltered() const { return wasAlteredFlag; }
+
+	// sets internal wasAltered flag to false
+	void ammendAlterations();
+
 	int getSize() const
 	{
 		return size;
@@ -79,6 +86,12 @@ public:
 		return cells;
 	}
 
+private:
+	const glm::ivec3 dim;
+	const int size;
+	const T nullValue;
+	std::vector<T> cells;
+	bool wasAlteredFlag{ false };
 };
 
 

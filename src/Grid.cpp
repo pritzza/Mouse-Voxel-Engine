@@ -86,7 +86,13 @@ bool Grid<T>::set(int index, const T& val)
 {
 	if (Math::isInside(index, 0, size))
 	{
-		cells[index] = val;
+		const T& existingVal{ cells[index] };
+
+		if (existingVal != val)
+		{
+			cells[index] = val;
+			wasAlteredFlag = true;
+		}
 		return true;
 	}
 
@@ -171,4 +177,10 @@ std::vector<glm::ivec3> Grid<T>::getSurroundingCoords(const glm::ivec3& coord) c
 		surroundingCoords.emplace_back(coord + offset);
 
 	return surroundingCoords;
+}
+
+template<typename T>
+void Grid<T>::ammendAlterations()
+{
+	wasAlteredFlag = false;
 }

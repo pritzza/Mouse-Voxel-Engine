@@ -157,6 +157,7 @@ void Application::handleInput()
 
     if (glfwGetKey(glfwWindow, GLFW_KEY_Q) == GLFW_PRESS)
     {
+        // TODO mouse picking
         glm::ivec2 windowDim{ window.getWidth(), window.getHeight() };
 
         // mouse position from center of window within interval [-1, 1]
@@ -227,6 +228,9 @@ void Application::update()
     const glm::ivec3& dim = vg.getDim();;
     const float size = vg.getSize();
     const int t = currentTime * 10;
+
+    // before potentially changing something, prep state to detect changes
+    vg.ammendAlterations();
     
     if (currentTime > 3)
     {
@@ -254,8 +258,8 @@ void Application::update()
             vg.setGraphic(randomIndex, color);
         }
     }
-    
-    gl->model->updateBuffers();
+
+    gl->model->syncToGrid();
     
     gl->shader.update(
         camera.getViewMatrix(),
