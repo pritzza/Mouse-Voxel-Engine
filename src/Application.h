@@ -47,7 +47,8 @@ public:
 	Window window;
 	Camera camera;
 
-	ResourceManager resMang;
+	ResourceManager<VoxelGrid> grids;
+	ResourceManager<VoxelModel> models;
 
 	struct OpenGLStuff2
 	{

@@ -37,7 +37,7 @@ bool VoxelGrid::set(int index, const Voxel& voxel)
 		voxelGraphics.set(index, voxel.graphic);
 
 		// dont need to update surrounding if only graphical change
-		if (isDifferentID)
+		//if (isDifferentID)
 			updateSurrounding(index);
 	}
 

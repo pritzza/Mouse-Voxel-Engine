@@ -69,7 +69,7 @@ void Application::initializeObjects()
 
     camera.setProjectionMatrix(FOV, ASPECT_RATIO, NEAR_PLANE, FAR_PLANE);
 
-    camera.setPosition({ 0.0f, 0.f, -10.f });
+    camera.setPosition({ 0.f, 0.f, 0.f });
     camera.setYaw(glm::radians(90.f));
 
     // allocate gl objects now that everything is loaded
@@ -84,7 +84,7 @@ void Application::initializeObjects()
     for (int i = 0; i < size; ++i)
     {
         Color color = { i / size , (i * 2 % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
-        Voxel voxel{ Voxel::ID::Filled, color, 0 };
+        Voxel voxel{ Voxel::ID::Filled, color };
         g.set(i, voxel);
     }
 
@@ -96,6 +96,60 @@ void Application::initializeObjects()
 
     o.transform.setPosition({ 10,0,0 });
     o.transform.update();
+
+    const glm::ivec3 dim{ 8,8,8 };
+    for (int i = 0; i < 3; ++i)
+    {
+        // create a grid
+        std::shared_ptr<VoxelGrid> g{ std::make_shared<VoxelGrid>(dim * (i + 1)) };
+        
+        for (int j = 0; j < g->getSize(); ++j)
+        {
+            // ignore this horrific code of me picking color and ID
+            const float f = 4.0 * j / g->getSize();
+            const Voxel::ID id{ (j % (i + 2)) == 0 ? Voxel::ID::Filled : Voxel::ID::Null};
+            const Color c( (i==0) * f, (i==1) * f, (i==2) * f, 1 );
+
+            const Voxel v{ id, c };
+            g->set(j, v);
+        }
+
+        // add grid to resources
+        grids.set(i, g);
+        
+        // create two models
+        std::shared_ptr<VoxelModel> m1{ std::make_shared<VoxelModel>(grids.get(i)) };
+        std::shared_ptr<VoxelModel> m2{ std::make_shared<VoxelModel>(grids.get(i)) };
+        
+        // save it one to resources
+        models.set(i, m1);
+
+        // get grid from resources
+        g = grids.get(i);
+        
+        // change grid that both models use
+        const Voxel v2{ Voxel::ID::Filled, Color(1,1,1,1) };
+        g->set(0, v2);
+        
+        // sync second model to updated grid
+        m2->syncToGrid();
+
+        // add second model to resources
+        models.set(i+3, m2);
+
+        // now grids shoud look like:
+        // 0 -> red updated
+        // 1 -> green updated
+        // 2 -> blue updated
+
+        // now models shoud look like:
+        // 0 -> red old
+        // 1 -> green old
+        // 2 -> blue old
+        // 3 -> red updated
+        // 4 -> green updated
+        // 5 -> blue updated
+    }
 }
 
 void Application::applicationLoop()
@@ -239,14 +293,14 @@ void Application::update()
         {
             const int randomIndex = Math::rng(0, size);
             //vg.setID(randomIndex, Voxel::ID::Null);
-            Voxel v{ Voxel::ID::Null, Color(.5,.5,.5,1), 0 };
+            Voxel v{ Voxel::ID::Null, Color(.5,.5,.5,1) };
             vg.set(randomIndex, v);
         }
     
         // make 1 rancom voxel filled
         for (int i = 0; i < 1; ++i)
         {
-            Voxel v{ Voxel::ID::Filled, Color(1,1,1,1), 0 };
+            Voxel v{ Voxel::ID::Filled, Color(1,1,1,1) };
 
             const int randomIndex = Math::rng(0, size);
             vg.setID(randomIndex, Voxel::ID::Filled);
@@ -269,6 +323,18 @@ void Application::update()
     );
 
     gl->renderer.render(gl->object, gl->shader);
+
+
+
+    for (int i = 0; i < 6; ++i)
+    {
+        VoxelObject o;
+        o.model = models.get(i);
+        o.transform.setPosition(glm::vec3( (i * 32) % (80), (i>2) * 32, 16));
+        o.transform.update();
+
+        gl->renderer.render(o, gl->shader);
+    }
 }
 
 void Application::display()

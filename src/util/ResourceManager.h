@@ -4,19 +4,23 @@
 #include <string>
 #include <unordered_map>
 
-#include "../gfx/gl/VAO.h"
-
+template <typename Resource>
 class ResourceManager
 {
-//public:
-//	void load(const std::string& id, const VoxelSpace& vs);
-//	void unload(const std::string& id);
-//
-//	const VoxelSpace& getVoxelSpace(const std::string& id) const;
-//	const VAO& getVoxelMeshVAO(const std::string& id) const;
-//
-//private:
-//	std::unordered_map<std::string, const VoxelSpace> voxelSpaces;
-//	std::unordered_map<std::string, VAO> voxelMeshVAOs;
+public:
+	std::shared_ptr<Resource> get(int id) const;
+	void set(int id, const std::shared_ptr<Resource>& data);
+
+	// gives a change to remove all unused resources
+	void update();
+
+private:
+	std::unordered_map<int, std::shared_ptr<Resource>> resources;
+
+private:
+	void unload(int id);
+	int resourceUseCount(int id) const;
+
 };
 
+#include "ResourceManager.cpp"

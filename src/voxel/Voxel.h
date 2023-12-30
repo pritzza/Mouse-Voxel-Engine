@@ -15,10 +15,23 @@ struct Voxel {
 		Filled
 	};
 
+	Voxel()
+		:
+		id{ ID::Null },
+		graphic{ 1.f, 1.f, 1.f, 1.f }
+	{}
+
+	Voxel(ID id, const Color& c, int surrounding=0)
+		:
+		id{ id },
+		graphic{ c },
+		surrounding{ surrounding }
+	{}
+
 	ID id;
 	//VoxelGraphicsData graphic;
 	Color graphic;
-	int surrounding;
+	int surrounding{};
 
 	enum Surrounding
 	{
