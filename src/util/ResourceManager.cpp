@@ -12,20 +12,18 @@ inline std::shared_ptr<Resource> ResourceManager<Resource>::get(int id) const
 template<typename Resource>
 inline void ResourceManager<Resource>::set(int id, const std::shared_ptr<Resource>& data)
 {
-	//const auto result{ resources.emplace({ id, data }) };
-	//const bool insertionHappened{ resources.emplace({ id, data }).second };
-	//
-	//if (insertionHappened)
-	//	return;
-	
-	//auto resourceIterator{ result.first };
-	//resourceIterator->second = data;
 	resources[id] = data;
 }
 
 template<typename Resource>
-void ResourceManager<Resource>::update()
+void ResourceManager<Resource>::freeUnusedResources()
 {
+	for (auto it : resources)
+	{
+		const int id{ it.first };
+		if (resourceUseCount(id) == 1)	// nothing else using resource
+			unload(id);
+	}
 }
 
 template<typename Resource>

@@ -28,18 +28,10 @@ bool VoxelGrid::set(int index, const Voxel& voxel)
 	if (!Math::isInside(index, 0, size))
 		return false;
 
-	const bool isDifferentID{ voxel.id != voxels.get(index) };
-	const bool worked{ voxels.set(index, voxel.id) };
+	const bool worked{ this->setID(index, voxel.id) };
 
 	if (worked)
-	{
-		// set graphic regardless of ID
-		voxelGraphics.set(index, voxel.graphic);
-
-		// dont need to update surrounding if only graphical change
-		//if (isDifferentID)
-			updateSurrounding(index);
-	}
+		this->setGraphic(index, voxel.graphic);
 
 	return worked;
 }
@@ -57,10 +49,15 @@ bool VoxelGrid::setID(const glm::ivec3& coord, Voxel::ID id)
 
 bool VoxelGrid::setID(int index, Voxel::ID id)
 {
-	const bool worked = voxels.set(index, id);
+	const bool isDifferentID{ id == voxels.get(index) };
+	const bool worked{ voxels.set(index, id) };
 
 	if (worked)
-		updateSurrounding(index);
+	{
+		// premature optimization to only update surroundings if needed
+		//if (isDifferentID)
+			updateSurrounding(index);
+	}
 
 	return worked;
 }
