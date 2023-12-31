@@ -240,12 +240,19 @@ void makeVoxel()
 
 	// TODO: figure out and fix why there are horribly wrong
 	// looks like everything is reversed and Z is backwards
-	bool addTop		= isVoxelNull(CenterBottomCenter);
-	bool addBottom	= isVoxelNull(CenterTopCenter);
+	//bool addTop		= isVoxelNull(CenterBottomCenter);
+	//bool addBottom	= isVoxelNull(CenterTopCenter);
+	//bool addFront	= isVoxelNull(CenterCenterFront);
+	//bool addBack	= isVoxelNull(CenterCenterBack);
+	//bool addLeft	= isVoxelNull(RightCenterCenter);
+	//bool addRight	= isVoxelNull(LeftCenterCenter);
+
+	bool addTop		= isVoxelNull(CenterTopCenter);
+	bool addBottom	= isVoxelNull(CenterBottomCenter);
 	bool addFront	= isVoxelNull(CenterCenterFront);
 	bool addBack	= isVoxelNull(CenterCenterBack);
-	bool addLeft	= isVoxelNull(RightCenterCenter);
-	bool addRight	= isVoxelNull(LeftCenterCenter);
+	bool addLeft	= isVoxelNull(LeftCenterCenter);
+	bool addRight	= isVoxelNull(RightCenterCenter);
 
 	if (addTop)
 		makeTopFace(pos);

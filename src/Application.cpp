@@ -60,13 +60,16 @@ void Application::stop()
 void Application::initializeObjects()
 {
     /// initializing camera
-    ASPECT_RATIO = (float)window.getWidth() / window.getHeight();
-
+    const float fov = glm::radians(90.f);
+    const float aspectRatio = (float)window.getWidth() / window.getHeight();
+    const float nearPlane = 0.1f;
+    const float farPlane = 1000.f;
+    
     camera.setProjectionMatrix(
-        glm::radians(FOV_DEG), 
-        ASPECT_RATIO, 
-        NEAR_PLANE, 
-        FAR_PLANE
+        fov,
+        aspectRatio,
+        nearPlane,
+        farPlane
     );
 
     camera.setPosition({ 0.f, 0.f, 0.f });
@@ -75,81 +78,128 @@ void Application::initializeObjects()
     // allocate gl objects now that everything is loaded
     gl = std::make_unique<OpenGLStuff2>();
 
-    gl->grid = std::make_shared<VoxelGrid>(glm::ivec3{ 8,8,8 });
-    gl->model = std::make_shared<VoxelModel>();
-
-    VoxelGrid& g{ *gl->grid.get() };
-    const float size = g.getSize();
-
-    for (int i = 0; i < size; ++i)
     {
-        Color color = { i / size , (i * 2 % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
-        Voxel voxel{ Voxel::ID::Filled, color };
-        g.set(i, voxel);
-    }
+        gl->grid = std::make_shared<VoxelGrid>(glm::ivec3{ 8,8,8 });
+        gl->model = std::make_shared<VoxelModel>();
 
-    VoxelModel& m{ *gl->model.get() };
-    m.create(gl->grid);
+        VoxelGrid& g{ *gl->grid.get() };
+        const float size = g.getSize();
 
-    VoxelObject& o{ gl->object };
-    o.model = gl->model;
-
-    o.transform.setPosition({ 10,0,0 });
-    o.transform.update();
-
-    const glm::ivec3 dim{ 8,8,8 };
-    for (int i = 0; i < 3; ++i)
-    {
-        // create a grid
-        std::shared_ptr<VoxelGrid> g{ std::make_shared<VoxelGrid>(dim * (i + 1)) };
-        
-        for (int j = 0; j < g->getSize(); ++j)
+        for (int i = 0; i < size; ++i)
         {
-            // ignore this horrific code of me picking color and ID
-            const float f = 4.0 * j / g->getSize();
-            const Voxel::ID id{ (j % (i + 2)) == 0 ? Voxel::ID::Filled : Voxel::ID::Null};
-            const Color c( (i==0) * f, (i==1) * f, (i==2) * f, 1 );
-
-            const Voxel v{ id, c };
-            g->set(j, v);
+            Color color = { i / size , (i * 2 % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
+            Voxel voxel{ Voxel::ID::Filled, color };
+            g.setVoxel(i, voxel);
         }
 
-        // add grid to resources
-        grids.set(i, g);
-        
-        // create two models
-        std::shared_ptr<VoxelModel> m1{ std::make_shared<VoxelModel>(grids.get(i)) };
-        std::shared_ptr<VoxelModel> m2{ std::make_shared<VoxelModel>(grids.get(i)) };
-        
-        // save it one to resources
-        models.set(i, m1);
+        VoxelModel& m{ *gl->model.get() };
+        m.create(gl->grid);
 
-        // get grid from resources
-        g = grids.get(i);
-        
-        // change grid that both models use
-        const Voxel v2{ Voxel::ID::Filled, Color(1,1,1,1) };
-        g->set(0, v2);
-        
-        // sync second model to updated grid
-        m2->syncToGrid();
+        VoxelObject& o{ gl->object };
+        o.model = gl->model;
 
-        // add second model to resources
-        models.set(i+3, m2);
-
-        // now grids shoud look like:
-        // 0 -> red updated
-        // 1 -> green updated
-        // 2 -> blue updated
-
-        // now models shoud look like:
-        // 0 -> red old
-        // 1 -> green old
-        // 2 -> blue old
-        // 3 -> red updated
-        // 4 -> green updated
-        // 5 -> blue updated
+        o.transform.setPosition({ 10,0,0 });
+        o.transform.update();
     }
+
+    // make big red, green, and blue models
+    {
+        const glm::ivec3 dim{ 8,8,8 };
+        for (int i = 0; i < 3; ++i)
+        {
+            // create a grid
+            std::shared_ptr<VoxelGrid> g{ std::make_shared<VoxelGrid>(dim * (i + 1)) };
+
+            for (int j = 0; j < g->getSize(); ++j)
+            {
+                // ignore this horrific code of me picking color and ID
+                const float f = 4.0 * j / g->getSize();
+                const Voxel::ID id{ (j % (i + 2)) == 0 ? Voxel::ID::Filled : Voxel::ID::Null };
+                const Color c((i == 0) * f, (i == 1) * f, (i == 2) * f, 1);
+
+                const Voxel v{ id, c };
+                g->setVoxel(j, v);
+            }
+
+            // add grid to resources
+            grids.set(i, g);
+
+            // create two models
+            std::shared_ptr<VoxelModel> m1{ std::make_shared<VoxelModel>(grids.get(i)) };
+            std::shared_ptr<VoxelModel> m2{ std::make_shared<VoxelModel>(grids.get(i)) };
+
+            // save it one to resources
+            models.set(i, m1);
+
+            // get grid from resources
+            g = grids.get(i);
+
+            // change grid that both models use
+            const Voxel v2{ Voxel::ID::Filled, Color(1,1,1,1) };
+            g->setVoxel(0, v2);
+
+            // sync second model to updated grid
+            m2->syncToGrid();
+
+            // add second model to resources
+            models.set(i + 3, m2);
+
+            // now grids shoud look like:
+            // 0 -> red updated
+            // 1 -> green updated
+            // 2 -> blue updated
+
+            // now models shoud look like:
+            // 0 -> red old
+            // 1 -> green old
+            // 2 -> blue old
+            // 3 -> red updated
+            // 4 -> green updated
+            // 5 -> blue updated
+        }
+    }
+
+    // create a white 2x2x2 voxel model/grid at id[ -1 ]
+    {
+        std::shared_ptr<VoxelGrid> g = std::make_shared<VoxelGrid>(glm::ivec3{ 2,2,2 });
+
+        for (int i = 0; i < g->getSize(); ++i)
+        {
+            Color color = { 1.f, 1.f, 1.f, 1.f };
+            Voxel voxel{ Voxel::ID::Filled, color };
+            g->setVoxel(i, voxel);
+        }
+
+        g->ammendAlterations();
+
+        std::shared_ptr<VoxelModel> m = std::make_shared<VoxelModel>();
+
+        m->create(g);
+
+        models.set(-1, m);
+        grids.set(-1, g);
+    }
+
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            std::shared_ptr<VoxelGrid> g = std::make_shared<VoxelGrid>(glm::ivec3{ 2,2,2 });
+            for (int j = 0; j < g->getSize(); ++j)
+            {
+                Color color(i == 0, i == 1, i == 2, 1);
+                Voxel voxel{ Voxel::ID::Filled, color };
+                g->setVoxel(j, voxel);
+            }
+
+            std::shared_ptr<VoxelModel> m = std::make_shared<VoxelModel>();
+            m->create(g);
+
+            const int id = i + 100;
+            models.set(id, m);
+            grids.set(id, g);
+        }
+    }
+
 }
 
 void Application::applicationLoop()
@@ -222,13 +272,15 @@ void Application::handleInput()
 
         std::cout << mousePos.x << ", " << mousePos.y << '\n';
 
-        float mousePitch = -glm::radians(FOV_DEG / 2.0) * mousePos.y;
-        float mouseYaw = glm::radians(FOV_DEG / 2.0) * mousePos.x * ASPECT_RATIO;
+        const float fov = camera.getFOV();
+        const float aspectRatio = camera.getAspectRatio();
+
+        float mousePitch = -fov/2 * mousePos.y;
+        float mouseYaw = fov/2 * mousePos.x * aspectRatio;
 
 
         const glm::vec3& camPos{ camera.getPosition() };
         const float camReach{ 5.f };
-        const float aspectRatio{ (float)windowDim.x / windowDim.y };
 
         /// camera's direction coordinate system
         const glm::vec3 camFront{ camera.getForwardDirection() * camReach };
@@ -291,7 +343,7 @@ void Application::update()
             const int randomIndex = Math::rng(0, size);
             //vg.setID(randomIndex, Voxel::ID::Null);
             Voxel v{ Voxel::ID::Null, Color(.5,.5,.5,1) };
-            vg.set(randomIndex, v);
+            vg.setVoxel(randomIndex, v);
         }
     
         // make 1 rancom voxel filled
@@ -331,6 +383,24 @@ void Application::update()
         VoxelObject o;
         o.model = models.get(i);
         o.transform.setPosition(glm::vec3( (i * 32) % (80), (i>2) * 32, 16));
+        o.transform.update();
+
+        gl->renderer.render(o, gl->shader);
+    }
+
+    {
+        VoxelObject o;
+        o.model = models.get(-1);
+        gl->renderer.render(o, gl->shader);
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        const int id = i + 100;
+
+        VoxelObject o;
+        o.model = models.get(id);
+        o.transform.setPosition(glm::vec3(i == 0, i == 1, i == 2) * 8.f);
         o.transform.update();
 
         gl->renderer.render(o, gl->shader);

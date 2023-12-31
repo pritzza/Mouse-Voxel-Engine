@@ -12,18 +12,18 @@ VoxelGrid::VoxelGrid(const glm::ivec3 dim)
 	setPositions();
 }
 
-bool VoxelGrid::set(const glm::ivec3& coord, const Voxel& voxel)
+bool VoxelGrid::setVoxel(const glm::ivec3& coord, const Voxel& voxel)
 {
 	if (Math::isInside(coord, dim))
 	{
 		const int index{ Math::toIndex(coord, dim) };
-		return set(index, voxel);
+		return setVoxel(index, voxel);
 	}
 
 	return false;
 }
 
-bool VoxelGrid::set(int index, const Voxel& voxel)
+bool VoxelGrid::setVoxel(int index, const Voxel& voxel)
 {
 	if (!Math::isInside(index, 0, size))
 		return false;

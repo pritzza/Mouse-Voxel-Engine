@@ -13,8 +13,8 @@ public:
 	// todo: 
 	// optimization can be writing a function for setting many things at once
 
-	bool set(const glm::ivec3& coord, const Voxel& voxel);
-	bool set(int index, const Voxel& voxel);
+	bool setVoxel(const glm::ivec3& coord, const Voxel& voxel);
+	bool setVoxel(int index, const Voxel& voxel);
 	bool setID(const glm::ivec3& coord, Voxel::ID id);
 	bool setID(int index, Voxel::ID id);
 	bool setGraphic(const glm::ivec3& coord, const Color& color);

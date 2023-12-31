@@ -4,21 +4,15 @@
 #include <GLFW/glfw3.h>
 
 #include "gfx/Camera.h"
-#include "gfx/ModelMatrix.h"
 #include "gfx/Window.h"
-
-#include "gfx/gl/ShaderProgram.h"
-#include "gfx/gl/Texture.h"
-#include "gfx/gl/VAO.h"
-
-#include "gfx/Lighting.h"
 
 #include "util/ResourceManager.h"
 
 #include "VoxelGrid.h"
-
 #include "VoxelModel.h"
+
 #include "voxel/VoxelShader.h"
+
 #include "gfx/VoxelRenderer.h"
 #include "gfx/VoxelObject.h"
 
@@ -68,11 +62,6 @@ private:
 	static constexpr int OPENGL_MAJOR_VERSION{ 3 };
 	static constexpr int OPENGL_MINOR_VERSION{ 3 };
 	static constexpr int OPENGL_PROFILE{ GLFW_OPENGL_CORE_PROFILE };
-
-	const float FOV_DEG{ 90.f };
-	float ASPECT_RATIO{ 1.f };
-	const float NEAR_PLANE{ 0.1f };
-	const float FAR_PLANE{ 1000.0f };
 
 private:
 	void initializeObjects();
