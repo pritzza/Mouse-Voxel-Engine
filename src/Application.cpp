@@ -78,6 +78,7 @@ void Application::initializeObjects()
     // allocate gl objects now that everything is loaded
     gl = std::make_unique<OpenGLStuff2>();
 
+    if (true)
     {
         gl->grid = std::make_shared<VoxelGrid>(glm::ivec3{ 8,8,8 });
         gl->model = std::make_shared<VoxelModel>();
@@ -103,6 +104,7 @@ void Application::initializeObjects()
     }
 
     // make big red, green, and blue models
+    if (true)
     {
         const glm::ivec3 dim{ 8,8,8 };
         for (int i = 0; i < 3; ++i)
@@ -161,7 +163,7 @@ void Application::initializeObjects()
 
     // create a white 2x2x2 voxel model/grid at id[ -1 ]
     {
-        std::shared_ptr<VoxelGrid> g = std::make_shared<VoxelGrid>(glm::ivec3{ 2,2,2 });
+        std::shared_ptr<VoxelGrid> g = std::make_shared<VoxelGrid>(glm::ivec3{ 1,2,1 });
 
         for (int i = 0; i < g->getSize(); ++i)
         {
@@ -180,6 +182,7 @@ void Application::initializeObjects()
         grids.set(-1, g);
     }
 
+    if (true)
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -326,44 +329,53 @@ void Application::update()
     // update camera matrix
     camera.update();
 
-    // update voxel stuff
-    VoxelGrid& vg = *gl->grid.get();
-    const glm::ivec3& dim = vg.getDim();;
-    const float size = vg.getSize();
-    const int t = currentTime * 10;
-
-    // before potentially changing something, prep state to detect changes
-    vg.ammendAlterations();
-    
-    if (currentTime > 3)
+    if (true)
     {
-        //// make 2 random voxels empty
-        for (int i = 0; i < 2; ++i)
-        {
-            const int randomIndex = Math::rng(0, size);
-            //vg.setID(randomIndex, Voxel::ID::Null);
-            Voxel v{ Voxel::ID::Null, Color(.5,.5,.5,1) };
-            vg.setVoxel(randomIndex, v);
-        }
-    
-        // make 1 rancom voxel filled
-        for (int i = 0; i < 1; ++i)
-        {
-            Voxel v{ Voxel::ID::Filled, Color(1,1,1,1) };
+        // update voxel stuff
+        VoxelGrid& vg = *gl->grid.get();
+        const glm::ivec3& dim = vg.getDim();;
+        const float size = vg.getSize();
+        const int t = currentTime * 10;
 
-            const int randomIndex = Math::rng(0, size);
-            vg.setID(randomIndex, Voxel::ID::Filled);
-            Color color = { 
-                (randomIndex * 1 % (int)size) / size ,
-                (randomIndex * t % (int)size) / size, 
-                (randomIndex * 3 % (int)size) / size, 
-                1.f };
-            vg.setGraphic(randomIndex, color);
+        // before potentially changing something, prep state to detect changes
+        vg.ammendAlterations();
+
+        if (currentTime > 3)
+        {
+            //// make 2 random voxels empty
+            for (int i = 0; i < 2; ++i)
+            {
+                const int randomIndex = Math::rng(0, size);
+                //vg.setID(randomIndex, Voxel::ID::Null);
+                Voxel v{ Voxel::ID::Null, Color(.5,.5,.5,1) };
+                vg.setVoxel(randomIndex, v);
+            }
+
+            // make 1 rancom voxel filled
+            for (int i = 0; i < 1; ++i)
+            {
+                Voxel v{ Voxel::ID::Filled, Color(1,1,1,1) };
+
+                const int randomIndex = Math::rng(0, size);
+                vg.setID(randomIndex, Voxel::ID::Filled);
+                Color color = {
+                    (randomIndex * 1 % (int)size) / size ,
+                    (randomIndex * t % (int)size) / size,
+                    (randomIndex * 3 % (int)size) / size,
+                    1.f };
+                vg.setGraphic(randomIndex, color);
+            }
         }
+
+        gl->model->syncToGrid();
+
     }
 
-    gl->model->syncToGrid();
+    //// pre rendering frame
+    // clear color buffer and depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    // update shader uniforms
     gl->shader.update(
         camera.getViewMatrix(),
         camera.getProjectionMatrix(),
@@ -371,39 +383,41 @@ void Application::update()
         currentTime
     );
 
-    //// pre rendering frame
-    // clear color buffer and depth buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
     //// rendering frame
-    gl->renderer.render(gl->object, gl->shader);
-
-    for (int i = 0; i < 6; ++i)
+    if (true)
     {
-        VoxelObject o;
-        o.model = models.get(i);
-        o.transform.setPosition(glm::vec3( (i * 32) % (80), (i>2) * 32, 16));
-        o.transform.update();
+        gl->renderer.render(gl->object, gl->shader);
 
-        gl->renderer.render(o, gl->shader);
+        for (int i = 0; i < 6; ++i)
+        {
+            VoxelObject o;
+            o.model = models.get(i);
+            o.transform.setPosition(glm::vec3((i * 32) % (80), (i > 2) * 32, 16));
+            o.transform.update();
+
+            gl->renderer.render(o, gl->shader);
+        }
     }
-
+    
     {
         VoxelObject o;
         o.model = models.get(-1);
         gl->renderer.render(o, gl->shader);
     }
 
-    for (int i = 0; i < 3; ++i)
+    if (true)
     {
-        const int id = i + 100;
+        for (int i = 0; i < 3; ++i)
+        {
+            const int id = i + 100;
 
-        VoxelObject o;
-        o.model = models.get(id);
-        o.transform.setPosition(glm::vec3(i == 0, i == 1, i == 2) * 8.f);
-        o.transform.update();
+            VoxelObject o;
+            o.model = models.get(id);
+            o.transform.setPosition(glm::vec3(i == 0, i == 1, i == 2) * 8.f);
+            o.transform.update();
 
-        gl->renderer.render(o, gl->shader);
+            gl->renderer.render(o, gl->shader);
+        }
     }
 }
 

@@ -108,6 +108,79 @@ void VoxelGrid::ammendAlterations()
 	ammendSurroundingDataAlterations();
 }
 
+void VoxelGrid::printSurroundingDebugInfo() const
+{
+	auto s = getSurroundingData();
+
+	for (int i = 0; i < s.size(); ++i)
+	{
+		std::cout << i << ": ";
+
+		const int n{ s[i].surrounding };
+
+		for (int j = sizeof(int) * 8 - 1; j >= 0; --j)
+		{
+			std::cout << ((n >> j) & 1);
+		}
+		std::cout << "\n";
+	}
+
+	auto getIndexName = [](int i) -> std::string {
+		switch (i) {
+		case 0: return "LeftBottomFront";
+		case 1: return "CenterBottomFront";
+		case 2: return "RightBottomFront";
+		case 3: return "LeftCenterFront";
+		case 4: return "CenterCenterFront";
+		case 5: return "RightCenterFront";
+		case 6: return "LeftTopFront";
+		case 7: return "CenterTopFront";
+		case 8: return "RightTopFront";
+		case 9: return "LeftBottomCenter";
+		case 10: return "CenterBottomCenter";
+		case 11: return "RightBottomCenter";
+		case 12: return "LeftCenterCenter";
+		case 13: return "CenterCenterCenter";
+		case 14: return "RightCenterCenter";
+		case 15: return "LeftTopCenter";
+		case 16: return "CenterTopCenter";
+		case 17: return "RightTopCenter";
+		case 18: return "LeftBottomBack";
+		case 19: return "CenterBottomBack";
+		case 20: return "RightBottomBack";
+		case 21: return "LeftCenterBack";
+		case 22: return "CenterCenterBack";
+		case 23: return "RightCenterBack";
+		case 24: return "LeftTopBack";
+		case 25: return "CenterTopBack";
+		case 26: return "RightTopBack";
+		default: return "Unknown";
+		}
+	};
+
+	for (int i = 0; i < s.size(); ++i)
+	{
+		glm::ivec3 c{ Math::toCoord(i, dim) };
+		std::cout << "Voxel " << i <<
+			" (" << c.x << ", " << c.y << ", " << c.z
+			<< ")  has the following bits set : \n";
+
+		const int n{ s[i].surrounding };
+
+		std::vector<int> setIndices;
+		for (int j = sizeof(int) * 8 - 1; j >= 0; --j)
+			if ((n >> j) & 1)
+				setIndices.push_back(j);
+
+		std::sort(setIndices.begin(), setIndices.end());
+
+		for (int j : setIndices)
+			std::cout << "(" << j << ", " << getIndexName(j) << ")\n";
+
+		std::cout << "\n";
+	}
+}
+
 void VoxelGrid::ammendGraphicsDataAlterations()
 {
 	voxelGraphics.ammendAlterations();
@@ -149,13 +222,14 @@ void VoxelGrid::setPositions()
 
 void VoxelGrid::updateSurrounding(const glm::ivec3& coord)
 {
+	const bool bit{ voxels.get(coord) == Voxel::ID::Filled };
 	const auto surroundingOffsets = Math::getCubeSurroundingCoords();
+	
 	for (const glm::ivec3& surroundingOffset : surroundingOffsets)
 	{
 		if (!Math::isInside(coord + surroundingOffset, dim))
 			continue;
 
-		bool bit{ voxels.get(coord) == Voxel::ID::Filled };
 		setSurroundingBit(bit, surroundingOffset, coord);
 	}
 }
@@ -181,12 +255,18 @@ void VoxelGrid::setSurroundingBit(
 
 	// bit corresponds to the index of the offset in a 
 	// 3^3 grid where index 0 is (0,0,0)
-	const int bitIndex{ Math::toIndex(offset + UNCENTER, DIM) };
+	const int bitIndex{ Math::toIndex(UNCENTER - offset, DIM) };
 
 	if (value)
+	{
 		data.surrounding |= (1 << bitIndex);	// set bit to 1
-	else 
+		//std::cout << "set " << bitIndex << " of (" << cc.x << ", " << cc.y << ", " << cc.z << ")\n";
+	}
+	else
+	{
 		data.surrounding &= ~(1 << bitIndex);	// set bit to 0
+		//std::cout << "unset " << bitIndex << " of (" << cc.x << ", " << cc.y << ", " << cc.z << ")\n";
+	}
 
 	surroundingVoxels.set(changingCoord, data);
 }

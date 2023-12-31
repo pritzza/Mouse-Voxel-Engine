@@ -136,13 +136,13 @@ void makeBottomFace(const vec3 p)
 void makeFrontFace(const vec3 p)
 {
 	const vec3[4] vertices = vec3[4](
-		vec3(0.0, 0.0, 1.0),
-		vec3(1.0, 0.0, 1.0),
-		vec3(0.0, 1.0, 1.0),
-		vec3(1.0, 1.0, 1.0)
+		vec3(0.0, 0.0, 0.0),
+		vec3(1.0, 0.0, 0.0),
+		vec3(0.0, 1.0, 0.0),
+		vec3(1.0, 1.0, 0.0)
 	);
 
-	normal = vec3(0.0, 0.0, 1.0);
+	normal = vec3(0.0, 0.0, -1.0);
 	
 	if (shouldCull(normal, vertices[0]))
 		return;
@@ -159,13 +159,13 @@ void makeFrontFace(const vec3 p)
 void makeBackFace(const vec3 p)
 {
 	const vec3[4] vertices = vec3[4](
-		vec3(0.0, 0.0, 0.0),
-		vec3(1.0, 0.0, 0.0),
-		vec3(0.0, 1.0, 0.0),
-		vec3(1.0, 1.0, 0.0)
+		vec3(0.0, 0.0, 1.0),
+		vec3(1.0, 0.0, 1.0),
+		vec3(0.0, 1.0, 1.0),
+		vec3(1.0, 1.0, 1.0)
 	);
 
-	normal = vec3(0.0, 0.0, -1.0);
+	normal = vec3(0.0, 0.0, 1.0);
 	
 	if (shouldCull(normal, vertices[0]))
 		return;
@@ -237,15 +237,6 @@ void makeVoxel()
 	highp int faces = inData[0].faces;
 
 	albedo = inData[0].color;
-
-	// TODO: figure out and fix why there are horribly wrong
-	// looks like everything is reversed and Z is backwards
-	//bool addTop		= isVoxelNull(CenterBottomCenter);
-	//bool addBottom	= isVoxelNull(CenterTopCenter);
-	//bool addFront	= isVoxelNull(CenterCenterFront);
-	//bool addBack	= isVoxelNull(CenterCenterBack);
-	//bool addLeft	= isVoxelNull(RightCenterCenter);
-	//bool addRight	= isVoxelNull(LeftCenterCenter);
 
 	bool addTop		= isVoxelNull(CenterTopCenter);
 	bool addBottom	= isVoxelNull(CenterBottomCenter);

@@ -23,6 +23,8 @@ public:
 	const VAO& getVAO() const { return vao; }
 	bool isInstanciated() const { return instantiated; }
 
+	std::shared_ptr<VoxelGrid> getVoxelGrid() const { return voxelGrid; }
+
 private:
 	VAO vao;
 	VBO* graphicsDataBuffer{ nullptr };
