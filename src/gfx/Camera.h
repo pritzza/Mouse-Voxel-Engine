@@ -1,7 +1,9 @@
 #pragma once
 
-#include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
+
+#include <glm/gtc/constants.hpp>
 
 // camera is meant to personify then abstract view matrix related transforms
 class Camera
@@ -18,12 +20,11 @@ public:
 	};
 
 public:
-	void moveRelative(Direction dir, float dt);
-	void moveAbsolute(const glm::vec3& dir, float dt);
+	void moveRelative(Direction dir, float distance);
+	void moveAbsolute(const glm::vec3& dir);
 
 	// creates new matrices with its current attributes
 	void update();
-
 
 	// getters
 	const glm::vec3& getPosition() const			{ return position;			}
@@ -35,18 +36,25 @@ public:
 	float getYaw() const					{ return yaw;		  }
 	const glm::mat4& getViewMatrix() const	{ return viewMatrix;  }
 
-	float getFOV() const					{ return fieldOfView; }
 	const glm::mat4& getProjectionMatrix() const { return perspectiveProjectionMatrix; }
 
 	// setters
-	void setProjectionMatrix(float fov, float ratio, float near, float far);
+	void setProjectionMatrix(float fovRad, float ratio, float near, float far);
+	void setProjectionMatrix();
 
 	void setPosition(const glm::vec3& pos)	{ position = pos; }
 	void setPitch(float p)					{ pitch = p;	  }
 	void setYaw(float y)					{ yaw = y;		  }
 
-	void setFOV(float fov)					{ fieldOfView = fov;   }
-	void setAspectRatio(float ratio)		{ aspectRatio = ratio; }
+	void setFOV(float fovRad)				{ fieldOfViewRad = fovRad;  }
+	void setAspectRatio(float ratio)		{ aspectRatio = ratio;		}
+	void setNearClippingPlane(float near)	{ nearPlaneDistance = near; }
+	void setFarClippingPlane(float far)		{ farPlaneDistance = far;	}
+
+	float getFOV()					const { return fieldOfViewRad;		}
+	float getAspectRatio()			const { return aspectRatio;			}
+	float getNearClippingPlane()	const { return nearPlaneDistance;	}
+	float getFarClippingPlane()		const { return farPlaneDistance;	}
 
 private:
 	// to create view matrix, camera requires position and its own coordinate system
@@ -65,10 +73,10 @@ private:
 	glm::mat4 viewMatrix;
 
 	// perspective projection attributes, required to generate perspective frustum
-	float fieldOfView{ 3.14f / 2 };
-	float nearPlaneDistance{ 0.1f };
-	float farPlaneDistance{ 100.f };
+	float fieldOfViewRad{ glm::half_pi<float>() };
 	float aspectRatio{ 1.f };
+	float nearPlaneDistance{ 0.1f };
+	float farPlaneDistance{ 1000.f };
 
 	glm::mat4 perspectiveProjectionMatrix;
 

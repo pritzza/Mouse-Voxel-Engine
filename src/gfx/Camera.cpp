@@ -2,24 +2,24 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-void Camera::moveRelative(Direction dir, float dt)
+void Camera::moveRelative(Direction dir, float distance)
 {
 	switch (dir)
 	{
-		case Direction::Forward:	position += forwardDirection * dt;	break;
-		case Direction::Backward:	position -= forwardDirection * dt;	break;
+		case Direction::Forward:	position += forwardDirection * distance;	break;
+		case Direction::Backward:	position -= forwardDirection * distance;	break;
 
-		case Direction::Up:			position += upDirection * dt;		break;
-		case Direction::Down:		position -= upDirection * dt;		break;
+		case Direction::Up:			position += upDirection * distance;			break;
+		case Direction::Down:		position -= upDirection * distance;			break;
 
-		case Direction::Right:		position += rightDirection * dt;	break;
-		case Direction::Left:		position -= rightDirection * dt;	break;
+		case Direction::Right:		position += rightDirection * distance;		break;
+		case Direction::Left:		position -= rightDirection * distance;		break;
 	}
 }
 
-void Camera::moveAbsolute(const glm::vec3& dir, float dt)
+void Camera::moveAbsolute(const glm::vec3& dir)
 {
-	position += dir * dt;
+	position += dir;
 }
 
 void Camera::update()
@@ -33,8 +33,15 @@ void Camera::setProjectionMatrix(float fov, float ratio, float near, float far)
 {
 	setFOV(fov);
 	setAspectRatio(ratio);
-	nearPlaneDistance = near;
-	farPlaneDistance = far;
+	setNearClippingPlane(near);
+	setFarClippingPlane(far);
+
+	updatePerspectiveMatrix();
+}
+
+void Camera::setProjectionMatrix()
+{
+	updatePerspectiveMatrix();
 }
 
 void Camera::updateViewMatrix()
@@ -46,7 +53,7 @@ void Camera::updateViewMatrix()
 void Camera::updatePerspectiveMatrix()
 {
 	perspectiveProjectionMatrix = glm::perspective(
-		fieldOfView,
+		fieldOfViewRad,
 		aspectRatio,
 		nearPlaneDistance,
 		farPlaneDistance

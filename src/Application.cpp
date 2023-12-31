@@ -60,14 +60,14 @@ void Application::stop()
 void Application::initializeObjects()
 {
     /// initializing camera
-    // create perspective projection matrix
-    const float FOV{ glm::radians(FOV_DEG) };
-    //const float ASPECT_RATIO{ (float)window.getWidth() / window.getHeight() };
     ASPECT_RATIO = (float)window.getWidth() / window.getHeight();
-    //const float NEAR_PLANE{ 0.1f };
-    //const float FAR_PLANE{ 1000.0f };
 
-    camera.setProjectionMatrix(FOV, ASPECT_RATIO, NEAR_PLANE, FAR_PLANE);
+    camera.setProjectionMatrix(
+        glm::radians(FOV_DEG), 
+        ASPECT_RATIO, 
+        NEAR_PLANE, 
+        FAR_PLANE
+    );
 
     camera.setPosition({ 0.f, 0.f, 0.f });
     camera.setYaw(glm::radians(90.f));
@@ -193,9 +193,9 @@ void Application::handleInput()
         camera.moveRelative(Camera::Direction::Right, travelDistance);
 
     if (glfwGetKey(glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camera.moveAbsolute(Math::J_HAT, travelDistance);
+        camera.moveAbsolute(Math::J_HAT * travelDistance);
     if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        camera.moveAbsolute(-Math::J_HAT, travelDistance);
+        camera.moveAbsolute(-Math::J_HAT * travelDistance);
 
     const float rotationSpeed{ 1.f };
     const float rotationAngle = rotationSpeed * deltaTime;
@@ -274,10 +274,7 @@ void Application::update()
     // update camera matrix
     camera.update();
 
-    //// pre rendering frame
-    // clear color buffer and depth buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    // update voxel stuff
     VoxelGrid& vg = *gl->grid.get();
     const glm::ivec3& dim = vg.getDim();;
     const float size = vg.getSize();
@@ -322,9 +319,12 @@ void Application::update()
         currentTime
     );
 
+    //// pre rendering frame
+    // clear color buffer and depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    //// rendering frame
     gl->renderer.render(gl->object, gl->shader);
-
-
 
     for (int i = 0; i < 6; ++i)
     {
