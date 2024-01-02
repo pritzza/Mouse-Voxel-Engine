@@ -28,7 +28,7 @@ public:
 	// voxel model will be uploaded every syncToGrid() call
 	void ammendAlterations();
 
-	void printSurroundingDebugInfo() const;
+	void printSurroundingDebugInfo(bool conciseReport=false) const;
 
 	bool wasGraphicsDataAltered() const;
 	bool wasPositionDataAltered() const;

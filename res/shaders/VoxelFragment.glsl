@@ -2,8 +2,11 @@
 
 in vec4 albedo;
 in vec3 normal;
+in float ao;
 
 out vec4 FragColor;
+
+uniform float time;
 
 // todo: add ambient occlusion
 // idea: CPU side, every voxel stores bitwise whether all the pixels
@@ -17,5 +20,5 @@ void main()
 	vec3 lightDir = normalize( vec3(1.0, 2.0, 0.0) );
 	float lightStrength = (dot(lightDir, normal) + 1) / 2.0;
 	
-	FragColor = albedo * lightColor * lightStrength;
+	FragColor = albedo * lightColor * lightStrength * ao + (time/100000);
 }

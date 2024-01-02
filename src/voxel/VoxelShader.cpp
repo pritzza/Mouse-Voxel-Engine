@@ -32,7 +32,7 @@ void VoxelShader::update(
 	setViewMatrix(viewMat);
 	setPerspectiveMatrix(perspectiveMat);
 	setViewPosition(viewPos);
-	//setTime(time);
+	setTime(time);
 
 	unuse();
 }

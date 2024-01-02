@@ -163,7 +163,7 @@ void Application::initializeObjects()
 
     // create a white 2x2x2 voxel model/grid at id[ -1 ]
     {
-        std::shared_ptr<VoxelGrid> g = std::make_shared<VoxelGrid>(glm::ivec3{ 1,2,1 });
+        std::shared_ptr<VoxelGrid> g = std::make_shared<VoxelGrid>(glm::ivec3{ 3,3,3 });
 
         for (int i = 0; i < g->getSize(); ++i)
         {
@@ -172,14 +172,20 @@ void Application::initializeObjects()
             g->setVoxel(i, voxel);
         }
 
-        g->ammendAlterations();
-
         std::shared_ptr<VoxelModel> m = std::make_shared<VoxelModel>();
-
         m->create(g);
+        models.set(1000, m);
 
-        models.set(-1, m);
-        grids.set(-1, g);
+        for (int i = 0; i < 9; ++i)
+        {
+            const glm::ivec3 coord = glm::ivec3{ 0,2,0 } + Math::toCoord(i, { 3,1,3 });
+            g->setID(coord, Voxel::ID::Null);
+            m = std::make_shared<VoxelModel>();
+            m->create(g);
+            models.set(1001 + i, m);
+            if(!i)
+                g->printSurroundingDebugInfo(true);
+        }
     }
 
     if (true)
@@ -399,9 +405,13 @@ void Application::update()
         }
     }
     
+
+    for (int i = 0; i < 9; ++i)
     {
         VoxelObject o;
-        o.model = models.get(-1);
+        o.model = models.get(1000 + i);
+        o.transform.setPosition({ 0,0, -4 * i });
+        o.transform.update();
         gl->renderer.render(o, gl->shader);
     }
 

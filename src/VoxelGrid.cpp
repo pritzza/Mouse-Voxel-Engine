@@ -108,7 +108,7 @@ void VoxelGrid::ammendAlterations()
 	ammendSurroundingDataAlterations();
 }
 
-void VoxelGrid::printSurroundingDebugInfo() const
+void VoxelGrid::printSurroundingDebugInfo(bool conciseReport) const
 {
 	auto s = getSurroundingData();
 
@@ -124,6 +124,9 @@ void VoxelGrid::printSurroundingDebugInfo() const
 		}
 		std::cout << "\n";
 	}
+
+	if (conciseReport)
+		return;
 
 	auto getIndexName = [](int i) -> std::string {
 		switch (i) {

@@ -65,6 +65,6 @@ private:
         UNIFORM_VIEW_MAT,
         UNIFORM_PERSPECTIVE_MAT,
         UNIFORM_VIEW_POSITION,
-        //UNIFORM_TIME
+        UNIFORM_TIME
     };
 };
