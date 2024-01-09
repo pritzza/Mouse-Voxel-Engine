@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Grid.h"
-
-#include "voxel/Voxel.h"
-#include "gfx/VertexAttributes.h"
+#include "Voxel.h"
+#include "../util/Grid.h"
 
 class VoxelGrid
 {
@@ -17,8 +15,8 @@ public:
 	bool setVoxel(int index, const Voxel& voxel);
 	bool setID(const glm::ivec3& coord, Voxel::ID id);
 	bool setID(int index, Voxel::ID id);
-	bool setGraphic(const glm::ivec3& coord, const Color& color);
-	bool setGraphic(int index, const Color& color);
+	bool setGraphic(const glm::ivec3& coord, const VoxelGraphicsData& color);
+	bool setGraphic(int index, const VoxelGraphicsData& color);
 
 	Voxel get(int index) const;
 	
@@ -34,8 +32,8 @@ public:
 	bool wasPositionDataAltered() const;
 	bool wasSurroundingDataAltered() const;
 
-	const std::vector<Color>& getGraphicsData() const;
-	const std::vector<Position>& getPositionData() const;
+	const std::vector<VoxelGraphicsData>& getGraphicsData() const;
+	const std::vector<glm::vec3>& getPositionData() const;
 	const std::vector<SurroundingVoxels>& getSurroundingData() const;
 
 	const glm::ivec3& getDim() const { return dim; }
@@ -43,8 +41,8 @@ public:
 
 private:
 	Grid<Voxel::ID> voxels;
-	Grid<Color> voxelGraphics;
-	Grid<Position> voxelPositions;
+	Grid<VoxelGraphicsData> voxelGraphics;
+	Grid<glm::vec3> voxelPositions;
 	Grid<SurroundingVoxels> surroundingVoxels;
 	const glm::ivec3 dim;
 	const int size;
@@ -66,7 +64,7 @@ private:
 
 private:
 	static constexpr Voxel::ID			DEFAULT_VOXEL_ID{ Voxel::ID::Null };
-	static constexpr Color				DEFAULT_VOXEL_GRAPHIC{ 1.f, 1.f, 1.f, 1.f };
-	static constexpr Position			DEFAULT_VOXEL_POSITION{ 0.f,0.f,0.f };
+	static constexpr VoxelGraphicsData	DEFAULT_VOXEL_GRAPHIC{ };
+	static constexpr glm::vec3			DEFAULT_VOXEL_POSITION{ 0.f, 0.f, 0.f };
 	static constexpr SurroundingVoxels	DEFAULT_VOXEL_SURROUNDINGS{ Voxel::Surrounding::Primary };
 };

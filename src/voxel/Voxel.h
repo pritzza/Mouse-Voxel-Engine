@@ -1,37 +1,51 @@
 #pragma once
 
 #include <glm/vec4.hpp>
-#include "../gfx/VertexAttributes.h"
+
+#include "../gfx/gl/VertexAttributes.h"
+
+typedef int SurroundingVoxels;
 
 struct VoxelGraphicsData
 {
-	glm::vec4 color;
+	constexpr VoxelGraphicsData() = default;
+
+	constexpr VoxelGraphicsData(float r, float g, float b, float a = 1.f)
+		:
+		color{ r, g, b, a }
+	{}
+
+	glm::vec4 color{ 1.f };
+	float x{};
+
+	bool operator==(const VoxelGraphicsData& o) const
+	{
+		return color == o.color;
+	}
+	bool operator!=(const VoxelGraphicsData& o) const
+	{
+		return !(*this == o);
+	}
 };
 
-struct Voxel {
+struct Voxel 
+{
 	enum class ID
 	{
 		Null,
 		Filled
 	};
 
-	Voxel()
-		:
-		id{ ID::Null },
-		graphic{ 1.f, 1.f, 1.f, 1.f }
-	{}
-
-	Voxel(ID id, const Color& c, int surrounding=0)
+	Voxel(ID id, const VoxelGraphicsData& g, SurroundingVoxels surrounding=0)
 		:
 		id{ id },
-		graphic{ c },
-		surrounding{ surrounding }
+		graphic{ g }
+		//surrounding{ surrounding }
 	{}
 
-	ID id;
-	//VoxelGraphicsData graphic;
-	Color graphic;
-	int surrounding{};
+	ID id{ ID::Null };
+	VoxelGraphicsData graphic;
+	//SurroundingVoxels surrounding{};	// not used currently
 
 	enum Surrounding
 	{

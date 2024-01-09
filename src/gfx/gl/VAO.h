@@ -3,6 +3,7 @@
 #include "VBO.h"
 
 #include <memory>
+#include "VertexAttributes.h"
 
 class VAO
 {
@@ -23,7 +24,10 @@ public:
     // Attribute must have a VertexAttributeInfo member defined
     // and named "META"
     template<typename Attribute>
-    void defineAttribute(const std::vector<Attribute>& data);
+    void defineAttribute(
+        const std::vector<Attribute>& attributeData,
+        const VertexAttributeMetaData& meta
+    );
 
     // buffers and binds GL_ELEMENT_ARRAY_BUFFER to self
     void defineIBO(const std::vector<GLuint>& indices);
@@ -63,36 +67,40 @@ private:
 };
 
 template<typename Attribute>
-void VAO::defineAttribute(const std::vector<Attribute>& attributeData)
+void VAO::defineAttribute(
+    const std::vector<Attribute>& attributeData,
+    const VertexAttributeMetaData& meta
+)
 {
     bind();
 
     vbos.emplace_back(VBO{ attributeData, GL_ARRAY_BUFFER });
     numVertices = attributeData.size();
 
-    if (Attribute::META.integerBased)
+    if (meta.integerBased)
     {
         glVertexAttribIPointer(
-            Attribute::META.location,            // attribute location
-            Attribute::META.numElements,         // elements per attribute
-            Attribute::META.elementDataType,     // element data type
-            sizeof(Attribute),                   // stride (in bytes)
-            0                                    // offset (in bytes)
+            meta.location,            // attribute location
+            meta.numElements,         // elements per attribute
+            meta.elementDataType,     // element data type
+            meta.stride,                   // stride (in bytes)
+            (void*)meta.offset                                    // offset (in bytes)
         );
     }
     else
     {
         glVertexAttribPointer(
-            Attribute::META.location,            // attribute location
-            Attribute::META.numElements,         // elements per attribute
-            Attribute::META.elementDataType,     // element data type
-            Attribute::META.shouldNormalize,     // normalized
-            sizeof(Attribute),                   // stride (in bytes)
-            0                                    // offset (in bytes)
+            meta.location,            // attribute location
+            meta.numElements,         // elements per attribute
+            meta.elementDataType,     // element data type
+            meta.shouldNormalize,     // normalized
+            meta.stride,                   // stride (in bytes)
+            (void*)meta.offset                                    // offset (in bytes)
         );
     }
+
     // enable attribute (no reason not to if we defined an attribute)
-    glEnableVertexAttribArray(Attribute::META.location);
+    glEnableVertexAttribArray(meta.location);
 }
 
 

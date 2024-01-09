@@ -1,11 +1,42 @@
 #pragma once
 
-#include "../gfx/gl/ShaderProgram.h"
+#include "gl/ShaderProgram.h"
+#include "gl/VertexAttributes.h"
 
-class VoxelModel;
+#include "../voxel/Voxel.h"
 
 class VoxelShader
 {
+public:
+    // Shader Attributes
+    inline static constexpr VertexAttributeMetaData POSITION_ATTRIBUTE{
+        0,                  // location
+        3,                  // numElements
+        GL_FLOAT,           // elementDataType
+        GL_FALSE,           // shouldNormalize
+        sizeof(glm::vec3),  // stride
+        0,                  // offset
+        false               // integerBased
+    };
+    inline static constexpr VertexAttributeMetaData COLOR_ATTRIBUTE{
+        1, 
+        4, 
+        GL_FLOAT, 
+        GL_FALSE, 
+        sizeof(VoxelGraphicsData), 
+        offsetof(VoxelGraphicsData, VoxelGraphicsData::color), 
+        false
+    };    
+    inline static constexpr VertexAttributeMetaData SURROUNDING_ATTRIBUTE{
+        2, 
+        1, 
+        GL_INT, 
+        GL_FALSE, 
+        sizeof(GLint), 
+        0, 
+        true
+    };
+
 public:
     VoxelShader();
 
@@ -67,4 +98,5 @@ private:
         UNIFORM_VIEW_POSITION,
         UNIFORM_TIME
     };
+
 };

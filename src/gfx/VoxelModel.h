@@ -1,8 +1,8 @@
 #pragma once
 
-#include "VoxelGrid.h"
+#include "../voxel/VoxelGrid.h"
 
-#include "gfx/gl/VAO.h"
+#include "gl/VAO.h"
 
 #include <memory>
 

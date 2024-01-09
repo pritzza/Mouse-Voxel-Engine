@@ -1,6 +1,6 @@
 #include "VoxelModel.h"
 
-#include "voxel/VoxelShader.h"
+#include "VoxelShader.h"
 
 VoxelModel::VoxelModel(const std::shared_ptr<VoxelGrid>& voxels)
 {
@@ -15,9 +15,9 @@ void VoxelModel::create(const std::shared_ptr<VoxelGrid>& voxels)
 
 	VoxelGrid& vg{ *voxelGrid.get() };
 
-	vao.defineAttribute(vg.getPositionData());
-	vao.defineAttribute(vg.getGraphicsData());
-	vao.defineAttribute(vg.getSurroundingData());
+	vao.defineAttribute(vg.getPositionData(),	 VoxelShader::POSITION_ATTRIBUTE);
+	vao.defineAttribute(vg.getGraphicsData(),	 VoxelShader::COLOR_ATTRIBUTE);
+	vao.defineAttribute(vg.getSurroundingData(), VoxelShader::SURROUNDING_ATTRIBUTE);
 
 	positionDataBuffer = &vao.getVBOs().at(0);
 	graphicsDataBuffer = &vao.getVBOs().at(1);

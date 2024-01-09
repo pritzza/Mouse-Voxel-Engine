@@ -6,7 +6,7 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "../VoxelModel.h"
+#include "VoxelModel.h"
 
 class VoxelObject;
 class VoxelShader;

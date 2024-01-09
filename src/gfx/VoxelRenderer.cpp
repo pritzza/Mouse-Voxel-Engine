@@ -1,7 +1,7 @@
 #include "VoxelRenderer.h"
 
-#include "../voxel/VoxelShader.h"
-#include "../gfx/VoxelObject.h"
+#include "VoxelShader.h"
+#include "VoxelObject.h"
 
 void VoxelRenderer::render(const VoxelObject& object, const VoxelShader& shader)
 {

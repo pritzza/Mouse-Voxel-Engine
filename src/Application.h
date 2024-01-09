@@ -8,10 +8,10 @@
 
 #include "util/ResourceManager.h"
 
-#include "VoxelGrid.h"
-#include "VoxelModel.h"
+#include "voxel/VoxelGrid.h"
+#include "gfx/VoxelModel.h"
 
-#include "voxel/VoxelShader.h"
+#include "gfx/VoxelShader.h"
 
 #include "gfx/VoxelRenderer.h"
 #include "gfx/VoxelObject.h"

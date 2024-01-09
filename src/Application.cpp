@@ -8,11 +8,7 @@
 
 #include <glm/trigonometric.hpp>
 
-#include "gfx/VertexAttributes.h"
-
-#include "util/Math.h"
-
-#include "VoxelGrid.h"
+#include "util/PerlinNoise.hpp"
 
 Application::Application(
 	const std::string_view& name, 
@@ -88,7 +84,7 @@ void Application::initializeObjects()
 
         for (int i = 0; i < size; ++i)
         {
-            Color color = { i / size , (i * 2 % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
+            VoxelGraphicsData color = { i / size , (i * 2 % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
             Voxel voxel{ Voxel::ID::Filled, color };
             g.setVoxel(i, voxel);
         }
@@ -103,71 +99,13 @@ void Application::initializeObjects()
         o.transform.update();
     }
 
-    // make big red, green, and blue models
-    if (true)
-    {
-        const glm::ivec3 dim{ 8,8,8 };
-        for (int i = 0; i < 3; ++i)
-        {
-            // create a grid
-            std::shared_ptr<VoxelGrid> g{ std::make_shared<VoxelGrid>(dim * (i + 1)) };
-
-            for (int j = 0; j < g->getSize(); ++j)
-            {
-                // ignore this horrific code of me picking color and ID
-                const float f = 4.0 * j / g->getSize();
-                const Voxel::ID id{ (j % (i + 2)) == 0 ? Voxel::ID::Filled : Voxel::ID::Null };
-                const Color c((i == 0) * f, (i == 1) * f, (i == 2) * f, 1);
-
-                const Voxel v{ id, c };
-                g->setVoxel(j, v);
-            }
-
-            // add grid to resources
-            grids.set(i, g);
-
-            // create two models
-            std::shared_ptr<VoxelModel> m1{ std::make_shared<VoxelModel>(grids.get(i)) };
-            std::shared_ptr<VoxelModel> m2{ std::make_shared<VoxelModel>(grids.get(i)) };
-
-            // save it one to resources
-            models.set(i, m1);
-
-            // get grid from resources
-            g = grids.get(i);
-
-            // change grid that both models use
-            const Voxel v2{ Voxel::ID::Filled, Color(1,1,1,1) };
-            g->setVoxel(0, v2);
-
-            // sync second model to updated grid
-            m2->syncToGrid();
-
-            // add second model to resources
-            models.set(i + 3, m2);
-
-            // now grids shoud look like:
-            // 0 -> red updated
-            // 1 -> green updated
-            // 2 -> blue updated
-
-            // now models shoud look like:
-            // 0 -> red old
-            // 1 -> green old
-            // 2 -> blue old
-            // 3 -> red updated
-            // 4 -> green updated
-            // 5 -> blue updated
-        }
-    }
-
     // create a white 2x2x2 voxel model/grid at id[ -1 ]
     {
         std::shared_ptr<VoxelGrid> g = std::make_shared<VoxelGrid>(glm::ivec3{ 3,3,3 });
 
         for (int i = 0; i < g->getSize(); ++i)
         {
-            Color color = { 1.f, 1.f, 1.f, 1.f };
+            VoxelGraphicsData color = { 1.f, 1.f, 1.f, 1.f };
             Voxel voxel{ Voxel::ID::Filled, color };
             g->setVoxel(i, voxel);
         }
@@ -183,8 +121,6 @@ void Application::initializeObjects()
             m = std::make_shared<VoxelModel>();
             m->create(g);
             models.set(1001 + i, m);
-            if(!i)
-                g->printSurroundingDebugInfo(true);
         }
     }
 
@@ -195,7 +131,7 @@ void Application::initializeObjects()
             std::shared_ptr<VoxelGrid> g = std::make_shared<VoxelGrid>(glm::ivec3{ 2,2,2 });
             for (int j = 0; j < g->getSize(); ++j)
             {
-                Color color(i == 0, i == 1, i == 2, 1);
+                VoxelGraphicsData color(i == 0, i == 1, i == 2, 1);
                 Voxel voxel{ Voxel::ID::Filled, color };
                 g->setVoxel(j, voxel);
             }
@@ -207,6 +143,60 @@ void Application::initializeObjects()
             models.set(id, m);
             grids.set(id, g);
         }
+    }
+
+    // making 64x32x64 terrain chunk
+    {
+        const glm::ivec3 chunkDim{ 256,64,256 };
+        std::shared_ptr<VoxelGrid> chunk{ std::make_shared<VoxelGrid>(chunkDim) };
+        const int chunkSize{ chunkDim.x * chunkDim.y * chunkDim.z };
+        for (int i = 0; i < chunkSize; ++i)
+            chunk->setID(i, Voxel::ID::Null);
+
+        int seed = 0;
+        float frequency = 4;
+        float octaves = 4;
+        const siv::PerlinNoise perlin( seed );
+        const double fx = (frequency / chunkDim.x);
+        const double fz = (frequency / chunkDim.z);
+
+        for (int z = 0; z < chunkDim.z; ++z)
+            for (int x = 0; x < chunkDim.x; ++x)
+            {
+                const float heightNormalized = perlin.octave2D_01(x * fx, z * fz, octaves);
+                const float height{ heightNormalized * chunkDim.y };
+                for (int i = 0; i < height; ++i)
+                {
+                    const VoxelGraphicsData SNOW{ .95,.95,1.,1. };
+                    const VoxelGraphicsData WATER{ .1,.1,.9,1. };
+                    const VoxelGraphicsData SAND{ .8,.8,.2,1. };
+                    const VoxelGraphicsData STONE{ .6,.6,.6,1. };
+                    const VoxelGraphicsData GRASS{.6,.9,.3,1.};
+
+                    VoxelGraphicsData color;
+                    if (heightNormalized > .8)
+                        color = SNOW;
+                    else if (heightNormalized > .65)
+                        color = STONE;
+                    else if (heightNormalized > .3)
+                        color = GRASS;
+                    else if (heightNormalized > .25)
+                        color = SAND;
+                    else
+                        color = WATER;
+
+                    const Voxel v{ Voxel::ID::Filled, color };
+                    
+                    const glm::ivec3 coord{ x, i, z };
+                    chunk->setVoxel(coord, v);
+                }
+            }
+        chunk->ammendAlterations();
+        std::shared_ptr<VoxelModel> m = std::make_shared<VoxelModel>();
+        m->create(chunk);
+
+        const int id = 10000;
+        models.set(id, m);
     }
 
 }
@@ -353,18 +343,18 @@ void Application::update()
             {
                 const int randomIndex = Math::rng(0, size);
                 //vg.setID(randomIndex, Voxel::ID::Null);
-                Voxel v{ Voxel::ID::Null, Color(.5,.5,.5,1) };
+                Voxel v{ Voxel::ID::Null, VoxelGraphicsData(.5,.5,.5,1) };
                 vg.setVoxel(randomIndex, v);
             }
 
             // make 1 rancom voxel filled
             for (int i = 0; i < 1; ++i)
             {
-                Voxel v{ Voxel::ID::Filled, Color(1,1,1,1) };
+                Voxel v{ Voxel::ID::Filled, VoxelGraphicsData(1,1,1,1) };
 
                 const int randomIndex = Math::rng(0, size);
                 vg.setID(randomIndex, Voxel::ID::Filled);
-                Color color = {
+                VoxelGraphicsData color = {
                     (randomIndex * 1 % (int)size) / size ,
                     (randomIndex * t % (int)size) / size,
                     (randomIndex * 3 % (int)size) / size,
@@ -390,21 +380,7 @@ void Application::update()
     );
 
     //// rendering frame
-    if (true)
-    {
-        gl->renderer.render(gl->object, gl->shader);
-
-        for (int i = 0; i < 6; ++i)
-        {
-            VoxelObject o;
-            o.model = models.get(i);
-            o.transform.setPosition(glm::vec3((i * 32) % (80), (i > 2) * 32, 16));
-            o.transform.update();
-
-            gl->renderer.render(o, gl->shader);
-        }
-    }
-    
+    gl->renderer.render(gl->object, gl->shader);
 
     for (int i = 0; i < 9; ++i)
     {
@@ -424,6 +400,20 @@ void Application::update()
             VoxelObject o;
             o.model = models.get(id);
             o.transform.setPosition(glm::vec3(i == 0, i == 1, i == 2) * 8.f);
+            o.transform.update();
+
+            gl->renderer.render(o, gl->shader);
+        }
+    }
+
+    {
+        const int id = 10000;
+
+        VoxelObject o;
+        o.model = models.get(id);
+        for (int i = 1; i <= 1; ++i)
+        {
+            o.transform.setPosition(glm::vec3(0, -100 * i, 0));
             o.transform.update();
 
             gl->renderer.render(o, gl->shader);
@@ -472,6 +462,7 @@ void Application::initOpenGL()
 	// set clear color of color buffer
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
 	// must include this line or else program crashes upon buffering texture data
 	// https://stackoverflow.com/questions/9950546/c-opengl-glteximage2d-access-violation

@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec4 aColor;
-layout (location = 4) in int aSurrounding;
+layout (location = 2) in int aSurrounding;
 
 out VertexData {
 	vec4 color;

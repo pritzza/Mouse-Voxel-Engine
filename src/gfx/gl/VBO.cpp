@@ -1,5 +1,6 @@
 #include "VBO.h"
 
+
 VBO::VBO(VBO&& other)
 {
 	*this = std::move(other);

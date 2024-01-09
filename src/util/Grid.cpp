@@ -1,10 +1,8 @@
 #include "Grid.h"
 
-#include "util/Math.h"
+#include "Math.h"
 
 #include <algorithm>
-
-#include <iostream>
 
 template <typename T>
 Grid<T>::Grid(const glm::ivec3& dim, const T& nullValue) 

@@ -6,8 +6,6 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../Lighting.h"
-
 #include "../../util/FileReader.h"
 
 ShaderProgram::ShaderProgram(
@@ -108,42 +106,6 @@ void ShaderProgram::setUniformMat4(
 ) const
 {
     glUniformMatrix4fv(uniforms.at(name), 1, GL_FALSE, glm::value_ptr(matrix));
-}
-
-void ShaderProgram::setUniformMaterial(
-    const std::string_view& shininess,
-    const std::string_view& ambient,
-    const std::string_view& diffuse,
-    const std::string_view& specular,
-    const Material& material
-) const
-{
-    // todo: there's no way i know of doing this, but need to somehow
-    // statically assert that names of Material members line up with
-    // atleast whats in the shader, if not both
-
-    glUniform1f(uniforms.at(shininess), material.shininess);
-    glUniform3fv(uniforms.at(ambient),  1, &material.ambientColor [0]);
-    glUniform3fv(uniforms.at(diffuse),  1, &material.diffuseColor [0]);
-    glUniform3fv(uniforms.at(specular), 1, &material.specularColor[0]);
-}
-
-void ShaderProgram::setUniformLight(
-    const std::string_view& position,
-    const std::string_view& ambient,
-    const std::string_view& diffuse,
-    const std::string_view& specular,
-    const Light& light
-) const
-{
-    // todo: there's no way i know of doing this, but need to somehow
-    // statically assert that names of Material members line up with
-    // atleast whats in the shader, if not both
-
-    glUniform3fv(uniforms.at(position), 1,  &light.position     [0]);
-    glUniform3fv(uniforms.at(ambient),  1,  &light.ambientColor [0]);
-    glUniform3fv(uniforms.at(diffuse),  1,  &light.diffuseColor [0]);
-    glUniform3fv(uniforms.at(specular), 1,  &light.specularColor[0]);
 }
 
 void ShaderProgram::use() const

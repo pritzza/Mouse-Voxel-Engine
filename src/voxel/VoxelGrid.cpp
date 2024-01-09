@@ -1,5 +1,9 @@
 #include "VoxelGrid.h"
 
+#include "../util/Math.h"
+
+#include <iostream>
+
 VoxelGrid::VoxelGrid(const glm::ivec3 dim)
 	:
 	dim{ dim },
@@ -62,7 +66,7 @@ bool VoxelGrid::setID(int index, Voxel::ID id)
 	return worked;
 }
 
-bool VoxelGrid::setGraphic(const glm::ivec3& coord, const Color& color)
+bool VoxelGrid::setGraphic(const glm::ivec3& coord, const VoxelGraphicsData& color)
 {
 	if (Math::isInside(coord, dim))
 	{
@@ -73,7 +77,7 @@ bool VoxelGrid::setGraphic(const glm::ivec3& coord, const Color& color)
 	return false;
 }
 
-bool VoxelGrid::setGraphic(int index, const Color& color)
+bool VoxelGrid::setGraphic(int index, const VoxelGraphicsData& color)
 {
 	return voxelGraphics.set(index, color);
 }
@@ -82,8 +86,8 @@ Voxel VoxelGrid::get(int index) const
 {
 	Voxel::ID id = voxels.get(index);
 	SurroundingVoxels surrounding = surroundingVoxels.get(index);
-	Color color = voxelGraphics.get(index);
-	return Voxel(id, color, surrounding.surrounding);
+	VoxelGraphicsData color = voxelGraphics.get(index);
+	return Voxel(id, color, surrounding);
 }
 
 bool VoxelGrid::wasGraphicsDataAltered() const
@@ -116,7 +120,7 @@ void VoxelGrid::printSurroundingDebugInfo(bool conciseReport) const
 	{
 		std::cout << i << ": ";
 
-		const int n{ s[i].surrounding };
+		const int n{ s[i] };
 
 		for (int j = sizeof(int) * 8 - 1; j >= 0; --j)
 		{
@@ -168,7 +172,7 @@ void VoxelGrid::printSurroundingDebugInfo(bool conciseReport) const
 			" (" << c.x << ", " << c.y << ", " << c.z
 			<< ")  has the following bits set : \n";
 
-		const int n{ s[i].surrounding };
+		const int n{ s[i] };
 
 		std::vector<int> setIndices;
 		for (int j = sizeof(int) * 8 - 1; j >= 0; --j)
@@ -199,12 +203,12 @@ void VoxelGrid::ammendSurroundingDataAlterations()
 	surroundingVoxels.ammendAlterations();
 }
 
-const std::vector<Color>& VoxelGrid::getGraphicsData() const
+const std::vector<VoxelGraphicsData>& VoxelGrid::getGraphicsData() const
 {
 	return voxelGraphics.getData();
 }
 
-const std::vector<Position>& VoxelGrid::getPositionData() const
+const std::vector<glm::vec3>& VoxelGrid::getPositionData() const
 {
 	return voxelPositions.getData();
 }
@@ -219,7 +223,7 @@ void VoxelGrid::setPositions()
 	for (int i = 0; i < size; ++i)
 	{
 		const glm::ivec3 coord{ Math::toCoord(i, dim) };
-		voxelPositions.set(i, Position( coord.x, coord.y, coord.z ));
+		voxelPositions.set(i, glm::vec3( coord.x, coord.y, coord.z ));
 	}
 }
 
@@ -262,12 +266,12 @@ void VoxelGrid::setSurroundingBit(
 
 	if (value)
 	{
-		data.surrounding |= (1 << bitIndex);	// set bit to 1
+		data |= (1 << bitIndex);	// set bit to 1
 		//std::cout << "set " << bitIndex << " of (" << cc.x << ", " << cc.y << ", " << cc.z << ")\n";
 	}
 	else
 	{
-		data.surrounding &= ~(1 << bitIndex);	// set bit to 0
+		data &= ~(1 << bitIndex);	// set bit to 0
 		//std::cout << "unset " << bitIndex << " of (" << cc.x << ", " << cc.y << ", " << cc.z << ")\n";
 	}
 

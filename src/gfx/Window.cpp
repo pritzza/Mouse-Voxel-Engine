@@ -20,6 +20,7 @@ Window::Window(
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minorVersion);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, profile);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);	// for MacOS
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	window = glfwCreateWindow(
 		startingWidth, 		// width
