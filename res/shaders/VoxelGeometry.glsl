@@ -128,19 +128,6 @@ ivec3 toCoord(int index, ivec3 dim)
     return ivec3( x, y, z );
 }
 
-bool test()
-{
-	ivec3 dim = ivec3(3);
-	for (int i = 0; i < 27; ++i)
-	{
-		ivec3 coord = toCoord(i, dim);
-		int index = toIndex(coord, dim);
-		if (i != index)
-			return false;
-	}
-	return true;
-}
-
 // takes the index of a surroundingBit and returns if that surrounding voxel is not present
 // argument bitIndex must be between [0, 26)
 bool isVoxelNull(int bitIndex)
@@ -193,13 +180,24 @@ int f(vec3 vertexPos, vec3 normal)
 
 	int count = 0;
 	float normalDirection = dot(normal, abs(normal));	// either 1 or -1
+
 	for (int i = 0; i < 4; ++i)
 	{ 
 		ivec3 currentSelectedCoord = toCoord(i, selectAreaDim);
+
+		const vec3 FLOATING_POINT_ERROR = vec3(0.999999);
 		
-		vec3 c = ((2*centerToVertex) + selectAreaCenter ) * normalDirection  + currentSelectedCoord + normal - vec3(0.999999);
+		// so close but not quite
+		vec3 c = 2 * (centerToVertex + normal) + selectAreaCenter // * normalDirection
+			+ currentSelectedCoord
+			- FLOATING_POINT_ERROR;
+
+		// hack
+		c = max(c, vec3(0));
+		c = min(c, vec3(3));
+		
 		highp int bitIndex = toIndex(ivec3(c), ivec3(3));
-		
+
 		if (isVoxelNull(bitIndex))
 			count++;
 	}
@@ -218,6 +216,18 @@ void makeFace(const vec3 p, const vec3[4] vertices, const vec3 n)
 	{
 		int count = f(vertices[i], normal);
 		ao = float(count / 3.f);
+
+		//if (count == 0)
+		//	albedo = vec4(.5,.5,.5,1);
+		//if (count == 1)
+		//	albedo = vec4(1,0,0,1);
+		//if (count == 2)
+		//	albedo = vec4(0,1,0,1);
+		//if (count == 3)
+		//	albedo = vec4(0,0,1,1);
+		//if (count > 3)
+		//	albedo = vec4(1,1,1,1);
+		
 		gl_Position = cameraTransform(p + vertices[i]);
 		EmitVertex();
 	}
@@ -291,6 +301,5 @@ void makeVoxel()
 
 void main()
 {
-if (test())
 	makeVoxel();
 }

@@ -20,8 +20,8 @@ void main()
 	vec3 lightDir = normalize( vec3(1.0, 2.0, 1.5) );
 	float MIN_LIGHT_STRENGTH = .2;
 	float lightStrength = max(dot(lightDir, normal), MIN_LIGHT_STRENGTH);
-	lightStrength = (dot(lightDir, normal) + 1) / 2.0;
+	//lightStrength = (dot(lightDir, normal) + 1) / 2.0;
 	
-	FragColor = albedo * lightColor * lightStrength * (1-(ao/8)) + (time/100000);
 	FragColor = albedo * lightColor * lightStrength * 1 + (time/100000);
+	FragColor = albedo * lightColor * lightStrength * ao + (time/100000);
 }
