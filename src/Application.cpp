@@ -76,6 +76,7 @@ void Application::initializeObjects()
 
     if (true)
     {
+
         gl->grid = std::make_shared<VoxelGrid>(glm::ivec3{ 8,8,8 });
         gl->model = std::make_shared<VoxelModel>();
 
@@ -84,7 +85,12 @@ void Application::initializeObjects()
 
         for (int i = 0; i < size; ++i)
         {
-            VoxelGraphicsData color = { i / size , (i * 2 % (int)size) / size, (i * 3 % (int)size) / size, 1.f };
+            VoxelGraphicsData color{
+                i / size , 
+                (i * 2 % (int)size) / size, 
+                (i * 3 % (int)size) / size, 
+                1.f 
+            };
             Voxel voxel{ Voxel::ID::Filled, color };
             g.setVoxel(i, voxel);
         }
@@ -97,6 +103,7 @@ void Application::initializeObjects()
 
         o.transform.setPosition({ 10,0,0 });
         o.transform.update();
+
     }
 
     // create a white 2x2x2 voxel model/grid at id[ -1 ]
@@ -167,11 +174,11 @@ void Application::initializeObjects()
                 const float height{ heightNormalized * chunkDim.y };
                 for (int i = 0; i < height; ++i)
                 {
-                    const VoxelGraphicsData SNOW{ .95,.95,1.,1. };
-                    const VoxelGraphicsData WATER{ .1,.1,.9,1. };
-                    const VoxelGraphicsData SAND{ .8,.8,.2,1. };
-                    const VoxelGraphicsData STONE{ .6,.6,.6,1. };
-                    const VoxelGraphicsData GRASS{.6,.9,.3,1.};
+                    const VoxelGraphicsData SNOW{  0.95, 0.95, 1.0,  1.0 };
+                    const VoxelGraphicsData WATER{ 0.1,  0.1,  0.9,  1.0 };
+                    const VoxelGraphicsData SAND{  0.8,  0.8,  0.2,  1.0 };
+                    const VoxelGraphicsData STONE{ 0.6,  0.6,  0.6,  1.0 };
+                    const VoxelGraphicsData GRASS{ 0.6,  0.9,  0.3,  1.0 };
 
                     VoxelGraphicsData color;
                     if (heightNormalized > .8)
@@ -327,6 +334,10 @@ void Application::update()
 
     if (true)
     {
+
+
+
+
         // update voxel stuff
         VoxelGrid& vg = *gl->grid.get();
         const glm::ivec3& dim = vg.getDim();;
@@ -336,34 +347,34 @@ void Application::update()
         // before potentially changing something, prep state to detect changes
         vg.ammendAlterations();
 
-        if (currentTime > 3)
+        //// make 2 random voxels empty
+        for (int i = 0; i < 2; ++i)
         {
-            //// make 2 random voxels empty
-            for (int i = 0; i < 2; ++i)
-            {
-                const int randomIndex = Math::rng(0, size);
-                //vg.setID(randomIndex, Voxel::ID::Null);
-                Voxel v{ Voxel::ID::Null, VoxelGraphicsData(.5,.5,.5,1) };
-                vg.setVoxel(randomIndex, v);
-            }
+            const int randomIndex = Math::rng(0, size);
+            //vg.setID(randomIndex, Voxel::ID::Null);
+            Voxel v{ Voxel::ID::Null, VoxelGraphicsData(.5,.5,.5,1) };
+            vg.setVoxel(randomIndex, v);
+        }
 
-            // make 1 rancom voxel filled
-            for (int i = 0; i < 1; ++i)
-            {
-                Voxel v{ Voxel::ID::Filled, VoxelGraphicsData(1,1,1,1) };
+        // make 1 random voxel filled
+        for (int i = 0; i < 1; ++i)
+        {
+            Voxel v{ Voxel::ID::Filled, VoxelGraphicsData(1,1,1,1) };
 
-                const int randomIndex = Math::rng(0, size);
-                vg.setID(randomIndex, Voxel::ID::Filled);
-                VoxelGraphicsData color = {
-                    (randomIndex * 1 % (int)size) / size ,
-                    (randomIndex * t % (int)size) / size,
-                    (randomIndex * 3 % (int)size) / size,
-                    1.f };
-                vg.setGraphic(randomIndex, color);
-            }
+            const int randomIndex = Math::rng(0, size);
+            vg.setID(randomIndex, Voxel::ID::Filled);
+            VoxelGraphicsData color = {
+                (randomIndex * 1 % (int)size) / size ,
+                (randomIndex * t % (int)size) / size,
+                (randomIndex * 3 % (int)size) / size,
+                1.f };
+            vg.setGraphic(randomIndex, color);
         }
 
         gl->model->syncToGrid();
+
+
+
 
     }
 

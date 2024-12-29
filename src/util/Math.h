@@ -135,4 +135,6 @@ namespace Math
     // return uniformly random int between [min, max)
     int rng(int min, int max);
 
+    int countSetBits(int n);
+
 };
