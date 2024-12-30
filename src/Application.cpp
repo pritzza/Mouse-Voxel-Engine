@@ -87,7 +87,6 @@ void Application::initializeObjects()
     gl->db = std::make_shared<FBO>(this->window.getWidth(), this->window.getHeight());
     gl->db->createDepthBuffer();
 
-    if (true)
     {
         gl->grid = std::make_shared<VoxelGrid>(glm::ivec3{ 8,8,8 });
         gl->model = std::make_shared<VoxelModel>();
@@ -143,7 +142,6 @@ void Application::initializeObjects()
         }
     }
 
-    if (true)
     {
         for (int i = 0; i < 3; ++i)
         {
@@ -341,11 +339,52 @@ void Application::update()
     if (window.shouldClose())
         stop();
 
-    // update camera matrix
-    camera.update();
+
+    // create scene
+
+    std::vector<VoxelObject> sceneObjects;
+    sceneObjects.emplace_back(gl->object);
+
+    {
+        for (int i = 0; i < 9; ++i)
+        {
+            VoxelObject o;
+            o.model = models.get(1000 + i);
+            o.transform.setPosition({ 0,0, -4 * i });
+            o.transform.update();
+            sceneObjects.emplace_back(o);
+        }
+    }
+
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            const int id = i + 100;
+
+            VoxelObject o;
+            o.model = models.get(id);
+            o.transform.setPosition(glm::vec3(i == 0, i == 1, i == 2) * 8.f);
+            o.transform.update();
+            sceneObjects.emplace_back(o);
+        }
+    }
+
+    {
+        const int id = 10000;
+
+        VoxelObject o;
+        o.model = models.get(id);
+        for (int i = 1; i <= 1; ++i)
+        {
+            o.transform.setPosition(glm::vec3(0, -100 * i, 0));
+            o.transform.update();
+            sceneObjects.emplace_back(o);
+        }
+    }
 
 
-    if (true)
+    // update scene
+
     {
         // update voxel stuff
         VoxelGrid& vg = *gl->grid.get();
@@ -385,11 +424,20 @@ void Application::update()
 
 
     //// pre rendering frame
-    // clear color buffer and depth buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
+    // update camera matrix
+    camera.update();
+
     // update shader uniforms
-    gl->shader.update(
+    gl->mainPass.update(
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix(),
+        camera.getPosition(),
+        currentTime
+    );
+
+    // update shader uniforms
+    gl->shadowPass.update(
         camera.getViewMatrix(),
         camera.getProjectionMatrix(),
         camera.getPosition(),
@@ -397,85 +445,35 @@ void Application::update()
     );
 
 
-    //// rendering frame
-    gl->renderer.render(gl->object, gl->shader);
+    /// render scene
 
-
-    for (int h = 0; h < 3; h++)
+    for (int pass = 0; pass < 2; pass++)
     {
-        if (h == 0)
-        {
-            FBO::bindDefault();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        }
-        else if (h == 1)
-        {
-            gl->fbo->bind();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        }
-        else if (h == 2)
+        if (pass == 0)      // shadow pass
         {
             gl->db->bind();
             glClear(GL_DEPTH_BUFFER_BIT);
         }
-
-        //// rendering frame
-        gl->renderer.render(gl->object, gl->shader);
-
-
-        for (int i = 0; i < 9; ++i)
+        else if (pass == 1) // regular pass
         {
-            VoxelObject o;
-            o.model = models.get(1000 + i);
-            o.transform.setPosition({ 0,0, -4 * i });
-            o.transform.update();
-            gl->renderer.render(o, gl->shader);
+            FBO::bindDefault();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        if (true)
+        for (const VoxelObject& o : sceneObjects)
         {
-            for (int i = 0; i < 3; ++i)
-            {
-                const int id = i + 100;
-
-                VoxelObject o;
-                o.model = models.get(id);
-                o.transform.setPosition(glm::vec3(i == 0, i == 1, i == 2) * 8.f);
-                o.transform.update();
-
-                gl->renderer.render(o, gl->shader);
-            }
-        }
-
-        {
-            const int id = 10000;
-
-            VoxelObject o;
-            o.model = models.get(id);
-            for (int i = 1; i <= 1; ++i)
-            {
-                o.transform.setPosition(glm::vec3(0, -100 * i, 0));
-                o.transform.update();
-
-                gl->renderer.render(o, gl->shader);
-            }
+            if (pass == 0)
+                gl->renderer.drawDepthMap(o, gl->shadowPass);
+            else if (pass == 1)
+                gl->renderer.render(o, gl->mainPass);
         }
     }
+
+
     
     // screenshot *roughly* once a second
     if (static_cast<int>(this->currentTime * 10) % 10 == 0)
     {
-        std::string fbName{ "screenshots/frame/" + std::to_string((int)this) 
-            + "_" + std::to_string(this->currentTime) + ".png" };
-
-        const FBO* fb{ gl->fbo.get() };
-        TexToImg::saveFrameBuffer(
-            fb->getTexture().value(),
-            fb->getWidth(),
-            fb->getHeight(),
-            fbName
-        );
-
         std::string dbName{ "screenshots/depth/" + std::to_string((int)this) 
             + "_" + std::to_string(this->currentTime) + ".png" };
         const FBO* db{ gl->db.get() };

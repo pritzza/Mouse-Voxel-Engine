@@ -9,13 +9,19 @@
 #include "VoxelModel.h"
 
 class VoxelObject;
+class MainPassVoxelShader;
+class ShadowPassVoxelShader;
 class VoxelShader;
 
-class VoxelRenderer {
+class VoxelRenderer 
+{
 public:
-	// Eenders voxel model with voxel shader at function call
-	void render(const VoxelObject& object, const VoxelShader& shader);
+	// Renders voxel model with voxel shader at function call
+	void render(const VoxelObject& object, const MainPassVoxelShader& shader);
 	
+	// for shadow pass
+	void drawDepthMap(const VoxelObject& object, const ShadowPassVoxelShader& shadowPass);
+
 	// Enqueues voxel model to be batch rendered in groups by underlying voxel grid
 	// the voxel shader used to render each batch of models is the one
 	// passed for the first element of each group. Objects are rendered

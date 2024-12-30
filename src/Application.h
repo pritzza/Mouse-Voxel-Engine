@@ -9,9 +9,11 @@
 #include "util/ResourceManager.h"
 
 #include "voxel/VoxelGrid.h"
+
 #include "gfx/VoxelModel.h"
 
-#include "gfx/VoxelShader.h"
+#include "gfx/MainPassVoxelShader.h"
+#include "gfx/ShadowPassVoxelShader.h"
 
 #include "gfx/VoxelRenderer.h"
 #include "gfx/VoxelObject.h"
@@ -56,7 +58,8 @@ public:
 
 		VoxelObject object;
 
-		VoxelShader shader;
+		MainPassVoxelShader mainPass;
+		ShadowPassVoxelShader shadowPass;
 
 		VoxelRenderer renderer;
 	};

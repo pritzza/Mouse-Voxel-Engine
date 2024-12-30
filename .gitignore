@@ -12,3 +12,6 @@
 *.vcxproj
 *.filters
 *.user
+
+# misc
+/screenshots

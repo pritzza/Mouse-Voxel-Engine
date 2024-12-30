@@ -15,13 +15,13 @@ void VoxelModel::create(const std::shared_ptr<VoxelGrid>& voxels)
 
 	VoxelGrid& vg{ *voxelGrid.get() };
 
-	vao.defineAttribute(vg.getPositionData(),	 VoxelShader::POSITION_ATTRIBUTE);
-	vao.defineAttribute(vg.getGraphicsData(),	 VoxelShader::COLOR_ATTRIBUTE);
-	vao.defineAttribute(vg.getSurroundingData(), VoxelShader::SURROUNDING_ATTRIBUTE);
+	vao.defineAttribute(vg.getPositionData(),	 VoxelModel::POSITION_ATTRIBUTE);
+	vao.defineAttribute(vg.getGraphicsData(),	 VoxelModel::COLOR_ATTRIBUTE);
+	vao.defineAttribute(vg.getSurroundingData(), VoxelModel::SURROUNDING_ATTRIBUTE);
 
-	positionDataBuffer = &vao.getVBOs().at(0);
-	graphicsDataBuffer = &vao.getVBOs().at(1);
-	surroundingDataBuffer = &vao.getVBOs().at(2);
+	positionDataBuffer	  = &vao.getVBOs().at(VoxelModel::POSITION_ATTRIBUTE.location);
+	graphicsDataBuffer	  = &vao.getVBOs().at(VoxelModel::COLOR_ATTRIBUTE.location);
+	surroundingDataBuffer = &vao.getVBOs().at(VoxelModel::SURROUNDING_ATTRIBUTE.location);
 
 	instantiated = true;
 }
