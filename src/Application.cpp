@@ -10,6 +10,10 @@
 
 #include "util/PerlinNoise.hpp"
 
+#include "gfx/gl/FBO.h"
+
+#include "util/TexToImg.h"
+
 Application::Application(
 	const std::string_view& name, 
 	int windowWidth, 
@@ -43,6 +47,9 @@ void Application::start()
 {
 	isRunning = true;
 
+    // initialize static things
+    FBO::applicationContextWindow = &window;
+
 	initializeObjects();
 	applicationLoop();
 }
@@ -73,6 +80,10 @@ void Application::initializeObjects()
 
     // allocate gl objects now that everything is loaded
     gl = std::make_unique<OpenGLStuff2>();
+
+    gl->fbo = std::make_shared<FBO>(256,256);
+
+    gl->fbo->createTexture();
 
     if (true)
     {
@@ -332,12 +343,9 @@ void Application::update()
     // update camera matrix
     camera.update();
 
+
     if (true)
     {
-
-
-
-
         // update voxel stuff
         VoxelGrid& vg = *gl->grid.get();
         const glm::ivec3& dim = vg.getDim();;
@@ -372,11 +380,8 @@ void Application::update()
         }
 
         gl->model->syncToGrid();
-
-
-
-
     }
+
 
     //// pre rendering frame
     // clear color buffer and depth buffer
@@ -390,46 +395,67 @@ void Application::update()
         currentTime
     );
 
+
     //// rendering frame
     gl->renderer.render(gl->object, gl->shader);
 
-    for (int i = 0; i < 9; ++i)
-    {
-        VoxelObject o;
-        o.model = models.get(1000 + i);
-        o.transform.setPosition({ 0,0, -4 * i });
-        o.transform.update();
-        gl->renderer.render(o, gl->shader);
-    }
 
-    if (true)
+    for (int h = 0; h < 2; h++)
     {
-        for (int i = 0; i < 3; ++i)
+        if (h == 0)
+            gl->fbo->bind();
+        else
+            FBO::bindDefault();
+
+
+        for (int i = 0; i < 9; ++i)
         {
-            const int id = i + 100;
+            VoxelObject o;
+            o.model = models.get(1000 + i);
+            o.transform.setPosition({ 0,0, -4 * i });
+            o.transform.update();
+            gl->renderer.render(o, gl->shader);
+        }
+
+        if (true)
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                const int id = i + 100;
+
+                VoxelObject o;
+                o.model = models.get(id);
+                o.transform.setPosition(glm::vec3(i == 0, i == 1, i == 2) * 8.f);
+                o.transform.update();
+
+                gl->renderer.render(o, gl->shader);
+            }
+        }
+
+        {
+            const int id = 10000;
 
             VoxelObject o;
             o.model = models.get(id);
-            o.transform.setPosition(glm::vec3(i == 0, i == 1, i == 2) * 8.f);
-            o.transform.update();
+            for (int i = 1; i <= 1; ++i)
+            {
+                o.transform.setPosition(glm::vec3(0, -100 * i, 0));
+                o.transform.update();
 
-            gl->renderer.render(o, gl->shader);
+                gl->renderer.render(o, gl->shader);
+            }
         }
     }
 
-    {
-        const int id = 10000;
+    std::string fn{ "screenshot_" + std::to_string(this->currentTime) + ".png" };
 
-        VoxelObject o;
-        o.model = models.get(id);
-        for (int i = 1; i <= 1; ++i)
-        {
-            o.transform.setPosition(glm::vec3(0, -100 * i, 0));
-            o.transform.update();
+    TexToImg::save(
+        gl->fbo->getTexture().value(), 
+        gl->fbo->getWidth(), 
+        gl->fbo->getHeight(), 
+        fn
+     );
 
-            gl->renderer.render(o, gl->shader);
-        }
-    }
 }
 
 void Application::display()

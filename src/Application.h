@@ -16,6 +16,8 @@
 #include "gfx/VoxelRenderer.h"
 #include "gfx/VoxelObject.h"
 
+class FBO;
+
 class Application
 {
 public:
@@ -46,6 +48,8 @@ public:
 
 	struct OpenGLStuff2
 	{
+		std::shared_ptr<FBO> fbo;
+
 		std::shared_ptr<VoxelGrid> grid;
 		std::shared_ptr<VoxelModel> model;
 
