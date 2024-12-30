@@ -81,13 +81,14 @@ void Application::initializeObjects()
     // allocate gl objects now that everything is loaded
     gl = std::make_unique<OpenGLStuff2>();
 
-    gl->fbo = std::make_shared<FBO>(256,256);
-
+    gl->fbo = std::make_shared<FBO>(this->window.getWidth(), this->window.getHeight());
     gl->fbo->createTexture();
+
+    gl->db = std::make_shared<FBO>(this->window.getWidth(), this->window.getHeight());
+    gl->db->createDepthBuffer();
 
     if (true)
     {
-
         gl->grid = std::make_shared<VoxelGrid>(glm::ivec3{ 8,8,8 });
         gl->model = std::make_shared<VoxelModel>();
 
@@ -400,12 +401,26 @@ void Application::update()
     gl->renderer.render(gl->object, gl->shader);
 
 
-    for (int h = 0; h < 2; h++)
+    for (int h = 0; h < 3; h++)
     {
         if (h == 0)
-            gl->fbo->bind();
-        else
+        {
             FBO::bindDefault();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+        else if (h == 1)
+        {
+            gl->fbo->bind();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+        else if (h == 2)
+        {
+            gl->db->bind();
+            glClear(GL_DEPTH_BUFFER_BIT);
+        }
+
+        //// rendering frame
+        gl->renderer.render(gl->object, gl->shader);
 
 
         for (int i = 0; i < 9; ++i)
@@ -446,16 +461,31 @@ void Application::update()
             }
         }
     }
+    
+    // screenshot *roughly* once a second
+    if (static_cast<int>(this->currentTime * 10) % 10 == 0)
+    {
+        std::string fbName{ "screenshots/frame/" + std::to_string((int)this) 
+            + "_" + std::to_string(this->currentTime) + ".png" };
 
-    std::string fn{ "screenshot_" + std::to_string(this->currentTime) + ".png" };
+        const FBO* fb{ gl->fbo.get() };
+        TexToImg::saveFrameBuffer(
+            fb->getTexture().value(),
+            fb->getWidth(),
+            fb->getHeight(),
+            fbName
+        );
 
-    TexToImg::save(
-        gl->fbo->getTexture().value(), 
-        gl->fbo->getWidth(), 
-        gl->fbo->getHeight(), 
-        fn
-     );
-
+        std::string dbName{ "screenshots/depth/" + std::to_string((int)this) 
+            + "_" + std::to_string(this->currentTime) + ".png" };
+        const FBO* db{ gl->db.get() };
+        TexToImg::saveDepthBuffer(
+            db->getDepthBuffer().value(),
+            db->getWidth(),
+            db->getHeight(),
+            dbName
+        );
+    }
 }
 
 void Application::display()

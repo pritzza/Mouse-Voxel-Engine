@@ -6,5 +6,8 @@ typedef unsigned int GLuint;
 
 namespace TexToImg 
 {
-    void save(GLuint textureHandle, int width, int height, const std::string& filePath);
+    void saveFrameBuffer(GLuint textureHandle, int width, int height, const std::string& filePath);
+
+    void saveDepthBuffer(GLuint texture, int width, int height, const std::string& filePath);
+
 }

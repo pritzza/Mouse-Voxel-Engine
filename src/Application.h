@@ -49,6 +49,7 @@ public:
 	struct OpenGLStuff2
 	{
 		std::shared_ptr<FBO> fbo;
+		std::shared_ptr<FBO> db;
 
 		std::shared_ptr<VoxelGrid> grid;
 		std::shared_ptr<VoxelModel> model;
