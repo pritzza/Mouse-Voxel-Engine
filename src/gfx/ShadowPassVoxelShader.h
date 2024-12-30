@@ -45,8 +45,6 @@ private:
 
     static constexpr UniformName UNIFORM_VIEW_POSITION{ "viewPosition" };
 
-    static constexpr UniformName UNIFORM_TIME{ "time" };
-
     const std::vector<UniformName> GET_UNIFORM_NAMES() const override
     {
         return 
@@ -55,7 +53,6 @@ private:
             UNIFORM_VIEW_MAT,
             UNIFORM_PERSPECTIVE_MAT,
             UNIFORM_VIEW_POSITION,
-            UNIFORM_TIME
         };
     }
 

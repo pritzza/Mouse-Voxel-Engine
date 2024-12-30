@@ -5,7 +5,6 @@ layout (triangle_strip, max_vertices = 18) out;
 //	you'll only see 3 faces of a cube at most
 
 in VertexData {
-	vec4 color;
 	highp int surrounding;
 } inData[];	// array of all vertices in primitive (only one cuz point)
 
@@ -15,12 +14,6 @@ uniform mat4 view;
 uniform mat4 perspective;
 
 uniform vec3 viewPosition;
-
-uniform float time;
-
-out vec4 albedo;
-out vec3 normal;
-out float ao;
 
 bool backFaceCull = true;
 
@@ -129,7 +122,7 @@ ivec3 toCoord(int index, ivec3 dim)
 }
 
 // takes the index of a surroundingBit and returns if that surrounding voxel is not present
-// argument bitIndex must be between [0, 26)
+// argument bitIndex must be between [0, 26]
 bool isVoxelNull(int bitIndex)
 {
 	int surrounding = inData[0].surrounding;
@@ -154,80 +147,13 @@ vec4 cameraTransform(const vec3 pos)
 	return perspective * view * model * vec4(pos, 1.0);
 }
 
-/*	ao algo:
-
-	select one vertex from a face
-	there is a 2x2x2 grid surrounding any vertex
-	select the half of the grid which is in the direction of the vertex's normal
-		
-	record the coordinates of those voxels relative to the voxel who's face we're making
-	use those coordinates and map them to the corresponding the surrounding bit map index
-	count how many of the 4 voxels are set for that vertex and set that to ao
-
-*/
-
-ivec3 getAODim(vec3 normal)
-{
-	return ivec3(2,2,2) - abs(ivec3(normal));
-}
-
-int f(vec3 vertexPos, vec3 normal)
-{
-	vec3 centerToVertex = vertexPos - (vertexPos/2.f);	// where origin is center of voxel
-														// pointing to vertex
-	ivec3 selectAreaDim = getAODim(normal);
-	vec3 selectAreaCenter = vec3(selectAreaDim) / 2.f; 
-
-	int count = 0;
-	float normalDirection = dot(normal, abs(normal));	// either 1 or -1
-
-	for (int i = 0; i < 4; ++i)
-	{ 
-		ivec3 currentSelectedCoord = toCoord(i, selectAreaDim);
-
-		const vec3 FLOATING_POINT_ERROR = vec3(0.999999);
-		
-		// so close but not quite
-		vec3 c = 2 * (centerToVertex + normal) + selectAreaCenter // * normalDirection
-			+ currentSelectedCoord
-			- FLOATING_POINT_ERROR;
-
-		// hack
-		c = max(c, vec3(0));
-		c = min(c, vec3(3));
-		
-		highp int bitIndex = toIndex(ivec3(c), ivec3(3));
-
-		if (isVoxelNull(bitIndex))
-			count++;
-	}
-
-	return count;
-}
-
 void makeFace(const vec3 p, const vec3[4] vertices, const vec3 n)
 {
 	if (shouldCull(n, vertices[0]))
 		return;
 
-	normal = n;
-
 	for (int i = 0; i < 4; ++i) 
 	{
-		int count = f(vertices[i], normal);
-		ao = float(count / 3.f);
-
-		//if (count == 0)
-		//	albedo = vec4(.5,.5,.5,1);
-		//if (count == 1)
-		//	albedo = vec4(1,0,0,1);
-		//if (count == 2)
-		//	albedo = vec4(0,1,0,1);
-		//if (count == 3)
-		//	albedo = vec4(0,0,1,1);
-		//if (count > 3)
-		//	albedo = vec4(1,1,1,1);
-		
 		gl_Position = cameraTransform(p + vertices[i]);
 		EmitVertex();
 	}
@@ -273,10 +199,6 @@ void makeVoxel()
 		return;
 
 	vec3 pos = vec3(gl_in[0].gl_Position);
-	highp int surrounding = inData[0].surrounding;
-
-	ao = 1;
-	albedo = inData[0].color;
 	
 	bool addTop		= isVoxelNull(CenterTopCenter);
 	bool addBottom	= isVoxelNull(CenterBottomCenter);

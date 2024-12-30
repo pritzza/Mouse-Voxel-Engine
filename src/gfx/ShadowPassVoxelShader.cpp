@@ -12,7 +12,6 @@ void ShadowPassVoxelShader::update(
 	setViewMatrix(viewMat);
 	setPerspectiveMatrix(perspectiveMat);
 	setViewPosition(viewPos);
-	setTime(time);
 
 	unuse();
 }
@@ -46,13 +45,5 @@ void ShadowPassVoxelShader::setViewPosition(const glm::vec3& pos)
 	program.setUniformVec3f(
 		UNIFORM_VIEW_POSITION,
 		pos
-	);
-}
-
-void ShadowPassVoxelShader::setTime(float time)
-{
-	program.setUniformf(
-		UNIFORM_TIME, 
-		time
 	);
 }
