@@ -1,16 +1,16 @@
 #include "ShadowPassVoxelShader.h"
 
 void ShadowPassVoxelShader::update(
-	const glm::mat4& viewMat, 
-	const glm::mat4& projectionMat, 
-	const glm::vec3& viewPos
+	const glm::mat4& lightViewMat, 
+	const glm::mat4& lightProjectionMat, 
+	const glm::vec3& cameraViewPos
 )
 {
 	use();
 
-	setViewMatrix(viewMat);
-	setProjectionMatrix(projectionMat);
-	setViewPosition(viewPos);
+	setViewMatrix(lightViewMat);
+	setProjectionMatrix(lightProjectionMat);
+	setViewPosition(cameraViewPos);
 
 	unuse();
 }

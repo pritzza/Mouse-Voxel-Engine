@@ -10,14 +10,14 @@ class Camera;
 
 namespace ShadowMapping
 {
+	glm::vec3 computeVirutalLightPosition(const Camera& camera);
+	
 	glm::mat4 createLightViewMatrix(const glm::vec3& lightDir, const Camera& camera);
 
 	glm::mat4 createLightProjectionMatrix(const glm::mat4& lightView, const Camera& camera);
 
 	namespace Helpers 
 	{
-		glm::vec3 computeVirutalLightPosition(const Camera& camera);
-
 		std::array<glm::vec3, 8> getFrustumCornersWorldSpace(
 			const glm::mat4& projection, 
 			const glm::mat4& view

@@ -10,9 +10,9 @@ public:
     ShadowPassVoxelShader() { init(); }
 
     void update(
-        const glm::mat4& viewMat,
-        const glm::mat4& projectionMat,
-        const glm::vec3& viewPos
+        const glm::mat4& lightViewMat,
+        const glm::mat4& lightProjectionMat,
+        const glm::vec3& cameraViewPos
     );
 
     void setModelMatrix(const glm::mat4& modelMat) const;

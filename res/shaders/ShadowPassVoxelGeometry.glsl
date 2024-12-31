@@ -8,14 +8,14 @@ in VertexData {
 	highp int surrounding;
 } inData[];	// array of all vertices in primitive (only one cuz point)
 
-// for camera transform
+// for light transform
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 uniform vec3 viewPosition;
 
-bool backFaceCull = true;
+bool backFaceCull = false;
 
 /// must be in continuity with Voxel.h
 
@@ -142,7 +142,7 @@ bool shouldCull(const vec3 normal, const vec3 faceOffset)
 	return dot(viewDir, normal) <= 0;
 }
 
-vec4 cameraTransform(const vec3 pos)
+vec4 lightTransform(const vec3 pos)
 {
 	return projection * view * model * vec4(pos, 1.0);
 }
@@ -154,7 +154,7 @@ void makeFace(const vec3 p, const vec3[4] vertices, const vec3 n)
 
 	for (int i = 0; i < 4; ++i) 
 	{
-		gl_Position = cameraTransform(p + vertices[i]);
+		gl_Position = lightTransform(p + vertices[i]);
 		EmitVertex();
 	}
 	EndPrimitive();

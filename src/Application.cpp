@@ -436,6 +436,14 @@ void Application::update()
     constexpr int SHADOW_PASS{ 0 };
     constexpr int MAIN_PASS{ 1 };
 
+    const glm::vec3 lightDirection{ 
+        glm::normalize( glm::vec3{glm::cos(currentTime/2), -2.0, glm::sin(currentTime/2)})
+    };
+
+    const glm::vec3 lightPos = ShadowMapping::computeVirutalLightPosition(camera);
+    const glm::mat4 lightViewMat = ShadowMapping::createLightViewMatrix(lightDirection, camera);
+    const glm::mat4 lightProjMat = ShadowMapping::createLightProjectionMatrix(lightViewMat, camera);
+
     for (int pass = 0; pass < 2; pass++)
     {
         if (pass == SHADOW_PASS)      // shadow pass pre render
@@ -445,9 +453,9 @@ void Application::update()
             
             // update shader uniforms
             gl->shadowPass.update(
-                camera.getViewMatrix(),
-                camera.getProjectionMatrix(),
-                camera.getPosition()
+                lightViewMat,
+                lightProjMat,
+                lightPos
             );
         }
         else if (pass == MAIN_PASS) // regular pass pre render
@@ -455,19 +463,10 @@ void Application::update()
             FBO::bindDefault();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    
 
-            const glm::vec3 lightDirection{ 
-                glm::normalize( glm::vec3{glm::cos(currentTime/2), -2.0, glm::sin(currentTime/2)})
-            };
-
-            const glm::mat4 lightViewMat = ShadowMapping::createLightViewMatrix(lightDirection, camera);
-            const glm::mat4 lightProjMat = ShadowMapping::createLightProjectionMatrix(lightViewMat, camera);
-
             // update shader uniforms
             gl->mainPass.update(
-                lightViewMat,
-                lightProjMat,
-                //camera.getViewMatrix(),
-                //camera.getProjectionMatrix(),
+                camera.getViewMatrix(),
+                camera.getProjectionMatrix(),
                 camera.getPosition(),
                 lightDirection,
                 *gl->db.get(),

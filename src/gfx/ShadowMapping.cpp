@@ -13,7 +13,7 @@
 
 glm::mat4 ShadowMapping::createLightViewMatrix(const glm::vec3& lightDir, const Camera& camera)
 {
-    glm::vec3 lightPos = Helpers::computeVirutalLightPosition(camera);
+    glm::vec3 lightPos = computeVirutalLightPosition(camera);
 
     glm::vec3 target = lightPos + lightDir;
 
@@ -38,7 +38,7 @@ glm::mat4 ShadowMapping::createLightProjectionMatrix(const glm::mat4& lightView,
     );
 }
 
-glm::vec3 ShadowMapping::Helpers::computeVirutalLightPosition(const Camera& camera)
+glm::vec3 ShadowMapping::computeVirutalLightPosition(const Camera& camera)
 {
     const float clippingCenterDist = (camera.getFarClippingPlane() + camera.getNearClippingPlane()) / 2.0;
 
