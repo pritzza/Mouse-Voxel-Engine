@@ -3,8 +3,7 @@
 void ShadowPassVoxelShader::update(
 	const glm::mat4& viewMat, 
 	const glm::mat4& perspectiveMat, 
-	const glm::vec3& viewPos, 
-	float time
+	const glm::vec3& viewPos
 )
 {
 	use();

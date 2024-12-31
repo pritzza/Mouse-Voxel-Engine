@@ -12,8 +12,7 @@ public:
     void update(
         const glm::mat4& viewMat,
         const glm::mat4& perspectiveMat,
-        const glm::vec3& viewPos,
-        float time
+        const glm::vec3& viewPos
     );
 
     void setModelMatrix(const glm::mat4& modelMat) const;
@@ -22,7 +21,6 @@ private:
     void setViewMatrix(const glm::mat4& viewMat);
     void setPerspectiveMatrix(const glm::mat4& perspectiveMat);
     void setViewPosition(const glm::vec3& pos);
-    void setTime(float time);
 
 private:
     constexpr FilePath GET_VERTEX_SHADER_PATH() const override

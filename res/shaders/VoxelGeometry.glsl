@@ -11,16 +11,15 @@ in VertexData {
 
 // for camera transform
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 perspective;
+uniform mat4 cameraView;
+uniform mat4 cameraPerspective;
 
 uniform vec3 viewPosition;
-
-uniform float time;
 
 out vec4 albedo;
 out vec3 normal;
 out float ao;
+out vec3 fragCoord;
 
 bool backFaceCull = true;
 
@@ -151,7 +150,7 @@ bool shouldCull(const vec3 normal, const vec3 faceOffset)
 
 vec4 cameraTransform(const vec3 pos)
 {
-	return perspective * view * model * vec4(pos, 1.0);
+	return cameraPerspective * cameraView * model * vec4(pos, 1.0);
 }
 
 /*	ao algo:
@@ -229,6 +228,7 @@ void makeFace(const vec3 p, const vec3[4] vertices, const vec3 n)
 		//	albedo = vec4(1,1,1,1);
 		
 		gl_Position = cameraTransform(p + vertices[i]);
+		fragCoord = gl_Position.xyz;
 		EmitVertex();
 	}
 	EndPrimitive();

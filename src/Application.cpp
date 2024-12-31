@@ -66,7 +66,7 @@ void Application::initializeObjects()
     const float fov = glm::radians(90.f);
     const float aspectRatio = (float)window.getWidth() / window.getHeight();
     const float nearPlane = 0.1f;
-    const float farPlane = 1000.f;
+    const float farPlane = 100.f;
     
     camera.setProjectionMatrix(
         fov,
@@ -163,6 +163,7 @@ void Application::initializeObjects()
     }
 
     // making 64x32x64 terrain chunk
+    if (false)
     {
         const glm::ivec3 chunkDim{ 256,64,256 };
         std::shared_ptr<VoxelGrid> chunk{ std::make_shared<VoxelGrid>(chunkDim) };
@@ -378,7 +379,7 @@ void Application::update()
         {
             o.transform.setPosition(glm::vec3(0, -100 * i, 0));
             o.transform.update();
-            sceneObjects.emplace_back(o);
+            //sceneObjects.emplace_back(o);
         }
     }
 
@@ -428,43 +429,47 @@ void Application::update()
     // update camera matrix
     camera.update();
 
-    // update shader uniforms
-    gl->mainPass.update(
-        camera.getViewMatrix(),
-        camera.getProjectionMatrix(),
-        camera.getPosition(),
-        currentTime
-    );
-
-    // update shader uniforms
-    gl->shadowPass.update(
-        camera.getViewMatrix(),
-        camera.getProjectionMatrix(),
-        camera.getPosition(),
-        currentTime
-    );
-
-
     /// render scene
+
+    constexpr int SHADOW_PASS{ 0 };
+    constexpr int MAIN_PASS{ 1 };
 
     for (int pass = 0; pass < 2; pass++)
     {
-        if (pass == 0)      // shadow pass
+        if (pass == SHADOW_PASS)      // shadow pass pre render
         {
             gl->db->bind();
-            glClear(GL_DEPTH_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT);    
+            
+            // update shader uniforms
+            gl->shadowPass.update(
+                camera.getViewMatrix(),
+                camera.getProjectionMatrix(),
+                camera.getPosition()
+            );
         }
-        else if (pass == 1) // regular pass
+        else if (pass == MAIN_PASS) // regular pass pre render
         {
             FBO::bindDefault();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    
+
+            // update shader uniforms
+            gl->mainPass.update(
+                camera.getViewMatrix(),
+                camera.getProjectionMatrix(),
+                camera.getPosition(),
+                *gl->db.get(),
+                glm::mat4{ 1 }, // TODO pass light view matrix
+                glm::mat4{ 1 }  // TODO pass light perpsective matrix
+            );
         }
+
 
         for (const VoxelObject& o : sceneObjects)
         {
-            if (pass == 0)
+            if (pass == SHADOW_PASS)
                 gl->renderer.drawDepthMap(o, gl->shadowPass);
-            else if (pass == 1)
+            else if (pass == MAIN_PASS)
                 gl->renderer.render(o, gl->mainPass);
         }
     }

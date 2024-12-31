@@ -1,18 +1,25 @@
 #include "MainPassVoxelShader.h"
 
+#include "gl/FBO.h"
+
 void MainPassVoxelShader::update(
 	const glm::mat4& viewMat, 
 	const glm::mat4& perspectiveMat, 
 	const glm::vec3& viewPos, 
-	float time
-)
+	const FBO& depthBuffer,
+	const glm::mat4& lightViewMat,
+	const glm::mat4& lightPerspectiveMat)
 {
 	use();
 
 	setViewMatrix(viewMat);
 	setPerspectiveMatrix(perspectiveMat);
+	
 	setViewPosition(viewPos);
-	setTime(time);
+	
+	setDepthBuffer(depthBuffer);
+	setLightViewMatrix(lightViewMat);
+	setLightPerspectiveMatrix(lightPerspectiveMat);
 
 	unuse();
 }
@@ -28,7 +35,7 @@ void MainPassVoxelShader::setModelMatrix(const glm::mat4& modelMat) const
 void MainPassVoxelShader::setViewMatrix(const glm::mat4& viewMat)
 {
 	program.setUniformMat4(
-		UNIFORM_VIEW_MAT,
+		UNIFORM_CAMERA_VIEW_MAT,
 		viewMat
 	);
 }
@@ -36,7 +43,7 @@ void MainPassVoxelShader::setViewMatrix(const glm::mat4& viewMat)
 void MainPassVoxelShader::setPerspectiveMatrix(const glm::mat4& perspectiveMat)
 {
 	program.setUniformMat4(
-		UNIFORM_PERSPECTIVE_MAT,
+		UNIFORM_CAMERA_PERSPECTIVE_MAT,
 		perspectiveMat
 	);
 }
@@ -49,10 +56,25 @@ void MainPassVoxelShader::setViewPosition(const glm::vec3& pos)
 	);
 }
 
-void MainPassVoxelShader::setTime(float time)
+void MainPassVoxelShader::setDepthBuffer(const FBO& depthBuffer)
 {
-	program.setUniformf(
-		UNIFORM_TIME, 
-		time
+	// TODO, this is kinda jank, should have some interface between depthbuffer and textures
+	glActiveTexture(GL_TEXTURE0 + DEPTH_BUFFER_TEXTURE_UNIT);
+	glBindTexture(GL_TEXTURE_2D, depthBuffer.getDepthBuffer().value());
+}
+
+void MainPassVoxelShader::setLightViewMatrix(const glm::mat4& lightViewMat)
+{
+	program.setUniformMat4(
+		UNIFORM_LIGHT_VIEW_MAT,
+		lightViewMat
+	);
+}
+
+void MainPassVoxelShader::setLightPerspectiveMatrix(const glm::mat4& lightPerspectiveMat)
+{
+	program.setUniformMat4(
+		UNIFORM_LIGHT_PERSPECTIVE_MAT,
+		lightPerspectiveMat
 	);
 }
