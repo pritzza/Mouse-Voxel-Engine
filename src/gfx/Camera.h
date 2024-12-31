@@ -36,7 +36,7 @@ public:
 	float getYaw() const					{ return yaw;		  }
 	const glm::mat4& getViewMatrix() const	{ return viewMatrix;  }
 
-	const glm::mat4& getProjectionMatrix() const { return perspectiveProjectionMatrix; }
+	const glm::mat4& getProjectionMatrix() const { return projectionMatrix; }
 
 	// setters
 	void setProjectionMatrix(float fovRad, float ratio, float near, float far);
@@ -78,10 +78,10 @@ private:
 	float nearPlaneDistance{ 0.1f };
 	float farPlaneDistance{ 1000.f };
 
-	glm::mat4 perspectiveProjectionMatrix;
+	glm::mat4 projectionMatrix;
 
 private:
 	void updateDirections();
 	void updateViewMatrix();
-	void updatePerspectiveMatrix();
+	void updateProjectionMatrix();
 };

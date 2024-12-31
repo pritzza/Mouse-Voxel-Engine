@@ -26,7 +26,7 @@ void Camera::update()
 {
 	updateDirections();
 	updateViewMatrix();
-	updatePerspectiveMatrix();
+	updateProjectionMatrix();
 }
 
 void Camera::setProjectionMatrix(float fov, float ratio, float near, float far)
@@ -36,12 +36,12 @@ void Camera::setProjectionMatrix(float fov, float ratio, float near, float far)
 	setNearClippingPlane(near);
 	setFarClippingPlane(far);
 
-	updatePerspectiveMatrix();
+	updateProjectionMatrix();
 }
 
 void Camera::setProjectionMatrix()
 {
-	updatePerspectiveMatrix();
+	updateProjectionMatrix();
 }
 
 void Camera::updateViewMatrix()
@@ -50,9 +50,9 @@ void Camera::updateViewMatrix()
 	viewMatrix = glm::lookAt(position, targetPosition, upDirection);
 }
 
-void Camera::updatePerspectiveMatrix()
+void Camera::updateProjectionMatrix()
 {
-	perspectiveProjectionMatrix = glm::perspective(
+	projectionMatrix = glm::perspective(
 		fieldOfViewRad,
 		aspectRatio,
 		nearPlaneDistance,

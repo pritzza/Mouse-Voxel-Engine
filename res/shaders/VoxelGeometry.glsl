@@ -12,7 +12,7 @@ in VertexData {
 // for camera transform
 uniform mat4 model;
 uniform mat4 cameraView;
-uniform mat4 cameraPerspective;
+uniform mat4 cameraProjection;
 
 uniform vec3 viewPosition;
 
@@ -150,7 +150,7 @@ bool shouldCull(const vec3 normal, const vec3 faceOffset)
 
 vec4 cameraTransform(const vec3 pos)
 {
-	return cameraPerspective * cameraView * model * vec4(pos, 1.0);
+	return cameraProjection * cameraView * model * vec4(pos, 1.0);
 }
 
 /*	ao algo:

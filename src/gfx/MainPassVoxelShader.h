@@ -14,11 +14,11 @@ public:
     // update all uniforms constant across frame
     void update(
         const glm::mat4& cameraViewMat,
-        const glm::mat4& cameraPerspectiveMat,
+        const glm::mat4& cameraProjectionMat,
         const glm::vec3& viewPos,
         const FBO& depthBuffer,
         const glm::mat4& lightViewMat,
-        const glm::mat4& lightPerspectiveMat
+        const glm::mat4& lightProjectionMat
     );
 
     void setModelMatrix(const glm::mat4& modelMat) const;
@@ -26,7 +26,7 @@ public:
 private:
     // camera transform
     void setViewMatrix(const glm::mat4& viewMat);
-    void setPerspectiveMatrix(const glm::mat4& perspectiveMat);
+    void setProjectionMatrix(const glm::mat4& projectionMat);
 
     // for back face culling
     void setViewPosition(const glm::vec3& pos);
@@ -34,7 +34,7 @@ private:
     // shadow mapping
     void setDepthBuffer(const FBO& depthBuffer);
     void setLightViewMatrix(const glm::mat4& lightViewMat);
-    void setLightPerspectiveMatrix(const glm::mat4& lightPerspectiveMat);
+    void setLightProjectionMatrix(const glm::mat4& lightProjectionMat);
 
 private:
     FilePath GET_VERTEX_SHADER_PATH() const override
@@ -53,7 +53,7 @@ private:
     // camera transform
     static constexpr UniformName UNIFORM_MODEL_MAT{ "model" };
     static constexpr UniformName UNIFORM_CAMERA_VIEW_MAT{ "cameraView" };
-    static constexpr UniformName UNIFORM_CAMERA_PERSPECTIVE_MAT{ "cameraPerspective" };
+    static constexpr UniformName UNIFORM_CAMERA_PROJECTION_MAT{ "cameraProjection" };
 
     static constexpr UniformName UNIFORM_VIEW_POSITION{ "viewPosition" };
 
@@ -61,7 +61,7 @@ private:
     static constexpr UniformName UNIFORM_DEPTH_BUFFER{ "depthBuffer" };
 
     static constexpr UniformName UNIFORM_LIGHT_VIEW_MAT{ "lightView" };
-    static constexpr UniformName UNIFORM_LIGHT_PERSPECTIVE_MAT{ "lightPerspective" };
+    static constexpr UniformName UNIFORM_LIGHT_PROJECTION_MAT{ "lightProjection" };
 
     const std::vector<UniformName> GET_UNIFORM_NAMES() const override
     {
@@ -69,11 +69,11 @@ private:
         {
             UNIFORM_MODEL_MAT,
             UNIFORM_CAMERA_VIEW_MAT,
-            UNIFORM_CAMERA_PERSPECTIVE_MAT,
+            UNIFORM_CAMERA_PROJECTION_MAT,
             UNIFORM_VIEW_POSITION,
             UNIFORM_DEPTH_BUFFER,
             UNIFORM_LIGHT_VIEW_MAT,
-            UNIFORM_LIGHT_PERSPECTIVE_MAT
+            UNIFORM_LIGHT_PROJECTION_MAT
         };
     }
 

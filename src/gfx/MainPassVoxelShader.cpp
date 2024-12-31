@@ -4,22 +4,22 @@
 
 void MainPassVoxelShader::update(
 	const glm::mat4& viewMat, 
-	const glm::mat4& perspectiveMat, 
+	const glm::mat4& projectionMat,
 	const glm::vec3& viewPos, 
 	const FBO& depthBuffer,
 	const glm::mat4& lightViewMat,
-	const glm::mat4& lightPerspectiveMat)
+	const glm::mat4& lightProjectionMat)
 {
 	use();
 
 	setViewMatrix(viewMat);
-	setPerspectiveMatrix(perspectiveMat);
+	setProjectionMatrix(projectionMat);
 	
 	setViewPosition(viewPos);
 	
 	setDepthBuffer(depthBuffer);
 	setLightViewMatrix(lightViewMat);
-	setLightPerspectiveMatrix(lightPerspectiveMat);
+	setLightProjectionMatrix(lightProjectionMat);
 
 	unuse();
 }
@@ -40,11 +40,11 @@ void MainPassVoxelShader::setViewMatrix(const glm::mat4& viewMat)
 	);
 }
 
-void MainPassVoxelShader::setPerspectiveMatrix(const glm::mat4& perspectiveMat)
+void MainPassVoxelShader::setProjectionMatrix(const glm::mat4& projectionMat)
 {
 	program.setUniformMat4(
-		UNIFORM_CAMERA_PERSPECTIVE_MAT,
-		perspectiveMat
+		UNIFORM_CAMERA_PROJECTION_MAT,
+		projectionMat
 	);
 }
 
@@ -71,10 +71,10 @@ void MainPassVoxelShader::setLightViewMatrix(const glm::mat4& lightViewMat)
 	);
 }
 
-void MainPassVoxelShader::setLightPerspectiveMatrix(const glm::mat4& lightPerspectiveMat)
+void MainPassVoxelShader::setLightProjectionMatrix(const glm::mat4& lightProjectionMat)
 {
 	program.setUniformMat4(
-		UNIFORM_LIGHT_PERSPECTIVE_MAT,
-		lightPerspectiveMat
+		UNIFORM_LIGHT_PROJECTION_MAT,
+		lightProjectionMat
 	);
 }

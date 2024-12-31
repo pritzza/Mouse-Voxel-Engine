@@ -11,7 +11,7 @@ in VertexData {
 // for camera transform
 uniform mat4 model;
 uniform mat4 view;
-uniform mat4 perspective;
+uniform mat4 projection;
 
 uniform vec3 viewPosition;
 
@@ -144,7 +144,7 @@ bool shouldCull(const vec3 normal, const vec3 faceOffset)
 
 vec4 cameraTransform(const vec3 pos)
 {
-	return perspective * view * model * vec4(pos, 1.0);
+	return projection * view * model * vec4(pos, 1.0);
 }
 
 void makeFace(const vec3 p, const vec3[4] vertices, const vec3 n)

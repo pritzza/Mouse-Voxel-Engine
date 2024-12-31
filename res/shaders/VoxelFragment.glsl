@@ -10,7 +10,7 @@ out vec4 FragColor;
 uniform sampler2D depthBuffer;
 
 uniform mat4 lightView;
-uniform mat4 lightPerspective;
+uniform mat4 lightProjection;
 
 // todo: add ambient occlusion
 // idea: CPU side, every voxel stores bitwise whether all the pixels
@@ -31,7 +31,7 @@ void main()
 	float lightStrength = max(dot(lightDir, normal), MIN_LIGHT_STRENGTH);
 	//lightStrength = (dot(lightDir, normal) + 1) / 2.0;
 	
-	vec4 garbage = (lightPerspective * lightView * vec4(1.0)) * 0.000001;
+	vec4 garbage = (lightProjection * lightView * vec4(1.0)) * 0.000001;
 
 	FragColor = albedo * lightColor * lightStrength * ao;
 	FragColor = vec4(vec3(depth), 1.0) + garbage;

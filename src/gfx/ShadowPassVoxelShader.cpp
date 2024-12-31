@@ -2,14 +2,14 @@
 
 void ShadowPassVoxelShader::update(
 	const glm::mat4& viewMat, 
-	const glm::mat4& perspectiveMat, 
+	const glm::mat4& projectionMat, 
 	const glm::vec3& viewPos
 )
 {
 	use();
 
 	setViewMatrix(viewMat);
-	setPerspectiveMatrix(perspectiveMat);
+	setProjectionMatrix(projectionMat);
 	setViewPosition(viewPos);
 
 	unuse();
@@ -31,11 +31,11 @@ void ShadowPassVoxelShader::setViewMatrix(const glm::mat4& viewMat)
 	);
 }
 
-void ShadowPassVoxelShader::setPerspectiveMatrix(const glm::mat4& perspectiveMat)
+void ShadowPassVoxelShader::setProjectionMatrix(const glm::mat4& projectionMat)
 {
 	program.setUniformMat4(
-		UNIFORM_PERSPECTIVE_MAT,
-		perspectiveMat
+		UNIFORM_PROJECTION_MAT,
+		projectionMat
 	);
 }
 

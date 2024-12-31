@@ -11,7 +11,7 @@ public:
 
     void update(
         const glm::mat4& viewMat,
-        const glm::mat4& perspectiveMat,
+        const glm::mat4& projectionMat,
         const glm::vec3& viewPos
     );
 
@@ -19,7 +19,7 @@ public:
 
 private:
     void setViewMatrix(const glm::mat4& viewMat);
-    void setPerspectiveMatrix(const glm::mat4& perspectiveMat);
+    void setProjectionMatrix(const glm::mat4& projectionMat);
     void setViewPosition(const glm::vec3& pos);
 
 private:
@@ -39,7 +39,7 @@ private:
     // camera transform
     static constexpr UniformName UNIFORM_MODEL_MAT{ "model" };
     static constexpr UniformName UNIFORM_VIEW_MAT{ "view" };
-    static constexpr UniformName UNIFORM_PERSPECTIVE_MAT{ "perspective" };
+    static constexpr UniformName UNIFORM_PROJECTION_MAT{ "projection" };
 
     static constexpr UniformName UNIFORM_VIEW_POSITION{ "viewPosition" };
 
@@ -49,7 +49,7 @@ private:
         {
             UNIFORM_MODEL_MAT,
             UNIFORM_VIEW_MAT,
-            UNIFORM_PERSPECTIVE_MAT,
+            UNIFORM_PROJECTION_MAT,
             UNIFORM_VIEW_POSITION,
         };
     }
