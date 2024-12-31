@@ -139,7 +139,7 @@ bool isVoxelNull(int bitIndex)
 	return !bool(surrounding & (1 << bitIndex));
 }
 
-bool shouldCull(const vec3 normal, const vec3 faceOffset)
+bool shouldBackFaceCull(const vec3 normal, const vec3 faceOffset)
 {
 	if (!backFaceCull)
 	 return false;
@@ -161,6 +161,47 @@ vec4 lightTransform(const vec3 pos)
 {
 	return lightProjection * lightView * model * vec4(pos, 1.0);
 }
+
+// doesnt really work
+bool shouldFrustumCull(const vec3 pos)
+{
+    // Define the 8 corner offsets of a unit cube centered at the origin
+    vec3[8] cornerOffsets = vec3[8](
+        vec3( 0.5,  0.5,  0.5), // +X +Y +Z
+        vec3( 0.5,  0.5, -0.5), // +X +Y -Z
+        vec3( 0.5, -0.5,  0.5), // +X -Y +Z
+        vec3( 0.5, -0.5, -0.5), // +X -Y -Z
+        vec3(-0.5,  0.5,  0.5), // -X +Y +Z
+        vec3(-0.5,  0.5, -0.5), // -X +Y -Z
+        vec3(-0.5, -0.5,  0.5), // -X -Y +Z
+        vec3(-0.5, -0.5, -0.5)  // -X -Y -Z
+    );
+
+    bool allCornersOutOfBounds = true;
+    
+    // Iterate through all the corners of the voxel (unit cube)
+    for (int i = 0; i < 8; i++)
+    {
+        // Calculate the position of each corner
+        vec3 cornerPos = pos + cornerOffsets[i]*2;
+
+        // Transform the corner position into clip space using the camera's transformation
+        vec4 clipSpaceCornerPos = cameraTransform(cornerPos);
+
+        // Check if the corner is inside the frustum in clip space
+        bool inBounds = abs(clipSpaceCornerPos.x) <= clipSpaceCornerPos.w && 
+                        abs(clipSpaceCornerPos.y) <= clipSpaceCornerPos.w && 
+                        abs(clipSpaceCornerPos.z) <= clipSpaceCornerPos.w;
+
+        // If any corner is inside the frustum, we do not cull it
+        if (inBounds)
+			return false;
+    }
+
+    // Return whether all corners are out of the frustum
+    return allCornersOutOfBounds;
+}
+
 
 /*	ao algo:
 
@@ -215,7 +256,7 @@ int f(vec3 vertexPos, vec3 normal)
 
 void makeFace(const vec3 p, const vec3[4] vertices, const vec3 n)
 {
-	if (shouldCull(n, vertices[0]))
+	if (shouldBackFaceCull(n, vertices[0]))
 		return;
 
 	normal = n;
@@ -274,6 +315,9 @@ void makeVoxel()
 
 	vec3 pos = vec3(gl_in[0].gl_Position);
 	highp int surrounding = inData[0].surrounding;
+
+	//if (shouldFrustumCull(pos))
+	//	return;
 
 	ao = 1;
 	albedo = inData[0].color;

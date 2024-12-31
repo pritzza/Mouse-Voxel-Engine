@@ -18,64 +18,78 @@ uniform vec3 lightDirection;
 uniform float nearPlane;
 uniform float farPlane;
 
-float LinearizeDepth(float depth)
-{
-    return depth;
-    float z = depth * 2.0 - 1.0; // Back to NDC 
-    return (2.0 * nearPlane * farPlane) / (farPlane + nearPlane - z * (farPlane - nearPlane));
-}
-
 float shadowCalculation(vec4 fragPosLightClipSpace)
 {
-    // Perform perspective divide for orthographic projection
+    // need perpective divide when doing perspective projection
     vec3 projCoords = fragPosLightClipSpace.xyz;
 
-    // Transform to [0,1] range
+    // Transform from [-1,1] range to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
 
-    // Check if the fragment is outside the light frustum
+    // If outside the [0,1] range, the fragment is outside the shadow map
     if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
-        projCoords.y < 0.0 || projCoords.y > 1.0)
+        projCoords.y < 0.0 || projCoords.y > 1.0 ||
+        projCoords.z < 0.0 || projCoords.z > 1.0)
     {
-        return 0.0; // Fully lit
+        return 0.0; 
     }
 
-    // Fetch the depth from the shadow map
+    // Read depth from the orthographic shadow map (already in [0,1] range)
     float closestDepth = texture(depthBuffer, projCoords.xy).r;
-    closestDepth = LinearizeDepth(closestDepth);
 
-    // Current depth of the fragment in light space
+    // Current depth also in [0,1]
     float currentDepth = projCoords.z;
 
-    // Apply a bias to reduce shadow acne
-    float bias = max(0.005 * (1.0 - dot(normalize(normal), -lightDirection)), 0.005);
+    // Apply a small bias to reduce shadow acne
+    float bias = 0.001;
 
-    // Check if the fragment is in shadow
-    float shadow = currentDepth > closestDepth + bias ? 1.0 : 0.0;
+    // Compare current depth against stored depth
+    float shadow = 0.0;
+
+    vec2 texelSize = 1.0 / textureSize(depthBuffer, 0);
+
+    for (int x = -1; x <= 1; ++x)
+        for (int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(depthBuffer, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+        }    
+
+    shadow /= 9.0;
+
+    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if (projCoords.z > 1.0)
+        shadow = 0.0;
 
     return shadow;
 }
 
 
-
 void main()
 {
-	vec2 uv = (fragPosCameraClipSpace.xy + 1.0) / 2.0; // from [-1,1] to [0,1]
-	float closestDepth = LinearizeDepth(texture(depthBuffer, uv).r);
+    // debugging shadow mapping
+	//vec2 uv = (fragPosCameraClipSpace.xy + 1.0) / 2.0; // from [-1,1] to [0,1]
+	//float closestDepth = texture(depthBuffer, uv).r;
+	//vec4 depthBufferDebugging = vec4(vec3(closestDepth), 1.0);
+
+    // debugging
+	vec4 normalShadingDebugging = vec4((normal + 1.0) / 2.0, 1.0);
+    
+    
+    // actual lighting calculations
+
+	vec3 lightColor = vec3(1.0);
+	
+    float ambientStrength = 0.3;
+    vec3 ambient = ambientStrength * lightColor;
+
+	vec3 lightDir = normalize( lightDirection );
+    float diffuseStrength = max(dot(-lightDir, normal), 0.0) * (1.0 - ambientStrength);
+    vec3 diffuse = vec3(diffuseStrength) * lightColor;
 
 	float shadow = shadowCalculation(fragPosLightClipSpace);
 
-	vec4 lightColor = vec4(1.0);
-	vec3 lightDir = normalize( lightDirection );
-	float MIN_LIGHT_STRENGTH = .2;
-	float lightStrength = max((1-shadow) * dot(-lightDir, normal), MIN_LIGHT_STRENGTH);
-	//lightStrength = (dot(lightDir, normal) + 1) / 2.0;
-	
-	vec4 garbage = (lightProjection * lightView * vec4(1.0)) * 0.000001 + vec4(lightDirection, 0.0) * 0.00001 + (0.00000001 * nearPlane + 0.00000001 * farPlane);
-	
-	vec4 normalShadingDebugging = vec4((normal + 1.0) / 2.0, 1.0);
-	vec4 depthBufferDebugging = vec4(vec3(closestDepth), 1.0);
-	vec4 regularColoring = ao * lightStrength * lightColor * albedo;
+	vec3 regularColoring = ao * (ambient + (1.0 - shadow) * diffuse) * vec3(albedo);
 
-	FragColor = regularColoring + garbage/1000000;
+	FragColor = vec4(regularColoring, 1.0);
 }

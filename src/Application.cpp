@@ -67,10 +67,10 @@ void Application::stop()
 void Application::initializeObjects()
 {
     /// initializing camera
-    const float fov = glm::radians(90.f);
+    const float fov = glm::radians(50.f);
     const float aspectRatio = (float)window.getWidth() / window.getHeight();
     const float nearPlane = 0.1f;
-    const float farPlane = 200.f;
+    const float farPlane = 150.f;
     
     camera.setProjectionMatrix(
         fov,
@@ -88,7 +88,7 @@ void Application::initializeObjects()
     gl->fbo = std::make_shared<FBO>(this->window.getWidth(), this->window.getHeight());
     gl->fbo->createTexture();
 
-    gl->db = std::make_shared<FBO>(this->window.getWidth() *4, this->window.getHeight()*4);
+    gl->db = std::make_shared<FBO>(1 << 12, 1 << 12);
     gl->db->createDepthBuffer();
 
     {
@@ -169,7 +169,8 @@ void Application::initializeObjects()
     // making 64x32x64 terrain chunk
     if (true)
     {
-        const glm::ivec3 chunkDim{ 256,64,256 };
+        chunkScale = 1 << 5;
+        const glm::ivec3 chunkDim{ 4 * chunkScale, 1 * chunkScale, 4 * chunkScale };
         std::shared_ptr<VoxelGrid> chunk{ std::make_shared<VoxelGrid>(chunkDim) };
         const int chunkSize{ chunkDim.x * chunkDim.y * chunkDim.z };
         for (int i = 0; i < chunkSize; ++i)
@@ -376,12 +377,13 @@ void Application::update()
 
     {
         const int id = 10000;
+        const glm::ivec3 chunkDim{ 4 * chunkScale, 1 * chunkScale, 4 * chunkScale };
 
         VoxelObject o;
         o.model = models.get(id);
         for (int i = 1; i <= 1; ++i)
         {
-            o.transform.setPosition(glm::vec3(-256/2, -64 * i, -256/2));
+            o.transform.setPosition(glm::vec3(-chunkDim.x/2, -chunkDim.y * i, -chunkDim.z/2));
             o.transform.update();
             sceneObjects.emplace_back(o);
         }
@@ -439,7 +441,7 @@ void Application::update()
     constexpr int MAIN_PASS{ 1 };
 
     const glm::vec3 lightDirection{ 
-        glm::normalize( glm::vec3{glm::cos(1 * currentTime/2), -2.0, glm::sin(1 * currentTime/2)})
+        glm::normalize( glm::vec3{glm::cos(1 * currentTime/2), -2.0, glm::sin(1 * currentTime/2 + 1)})
     };
 
     const glm::vec3 lightPos = ShadowMapping::computeVirutalLightPosition(camera);
@@ -462,6 +464,8 @@ void Application::update()
                 lightProjMat,
                 lightPos
             );
+
+            glCullFace(GL_FRONT); // Cull front-facing triangles -> draw only back-facing triangles
         }
         else if (pass == MAIN_PASS) // regular pass pre render
         {
@@ -478,10 +482,10 @@ void Application::update()
                 lightDirection,
                 *gl->db.get(),
                 lightViewMat,
-                lightProjMat,
-                camera.getNearClippingPlane(),
-                camera.getFarClippingPlane()
+                lightProjMat
             );
+
+            glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
         }
 
 

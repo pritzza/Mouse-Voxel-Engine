@@ -48,6 +48,8 @@ public:
 	ResourceManager<VoxelGrid> grids;
 	ResourceManager<VoxelModel> models;
 
+	int chunkScale{ 1 };
+
 	struct OpenGLStuff2
 	{
 		std::shared_ptr<FBO> fbo;

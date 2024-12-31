@@ -39,7 +39,7 @@ glm::mat4 ShadowMapping::createLightProjectionMatrix(const glm::mat4& lightView,
     const glm::vec3 minBounds{ lsBoundingBox[0] };
     const glm::vec3 maxBounds{ lsBoundingBox[1] };
 
-    constexpr float DEPTH_MARGIN{ 0.1f };
+    float DEPTH_MARGIN{ (maxBounds.z - minBounds.z) / 10.f };
 
     return glm::ortho(
         minBounds.x, maxBounds.x,   // left, right
