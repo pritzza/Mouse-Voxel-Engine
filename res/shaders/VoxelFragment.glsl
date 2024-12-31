@@ -12,6 +12,8 @@ uniform sampler2D depthBuffer;
 uniform mat4 lightView;
 uniform mat4 lightProjection;
 
+uniform vec3 lightDirection;
+
 // todo: add ambient occlusion
 // idea: CPU side, every voxel stores bitwise whether all the pixels
 //		 surrounding it are transparent (0) or opaque (1).
@@ -26,13 +28,16 @@ void main()
 	float depth = texture(depthBuffer, uv).r;
 
 	vec4 lightColor = vec4(1.0);
-	vec3 lightDir = normalize( vec3(1.0, 2.0, 1.5) );
+	vec3 lightDir = normalize( lightDirection );
 	float MIN_LIGHT_STRENGTH = .2;
-	float lightStrength = max(dot(lightDir, normal), MIN_LIGHT_STRENGTH);
+	float lightStrength = max(dot(-lightDir, normal), MIN_LIGHT_STRENGTH);
 	//lightStrength = (dot(lightDir, normal) + 1) / 2.0;
 	
 	vec4 garbage = (lightProjection * lightView * vec4(1.0)) * 0.000001;
+	
+	vec4 normalShadingDebugging = vec4((normal + 1.0) / 2.0, 1.0);
+	vec4 depthBufferDebugging = vec4(vec3(depth), 1.0);
+	vec4 regularColoring = ao * lightStrength * lightColor * albedo;
 
-	FragColor = albedo * lightColor * lightStrength * ao;
-	FragColor = vec4(vec3(depth), 1.0) + garbage;
+	FragColor = regularColoring + garbage;
 }

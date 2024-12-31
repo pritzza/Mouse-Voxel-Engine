@@ -16,6 +16,7 @@ public:
         const glm::mat4& cameraViewMat,
         const glm::mat4& cameraProjectionMat,
         const glm::vec3& viewPos,
+        const glm::vec3& lightDirection,
         const FBO& depthBuffer,
         const glm::mat4& lightViewMat,
         const glm::mat4& lightProjectionMat
@@ -27,6 +28,8 @@ private:
     // camera transform
     void setViewMatrix(const glm::mat4& viewMat);
     void setProjectionMatrix(const glm::mat4& projectionMat);
+
+    void setLightDirection(const glm::vec3& lightDirection);
 
     // for back face culling
     void setViewPosition(const glm::vec3& pos);
@@ -63,6 +66,8 @@ private:
     static constexpr UniformName UNIFORM_LIGHT_VIEW_MAT{ "lightView" };
     static constexpr UniformName UNIFORM_LIGHT_PROJECTION_MAT{ "lightProjection" };
 
+    static constexpr UniformName UNIFORM_LIGHT_DIRECTION{ "lightDirection" };
+
     const std::vector<UniformName> GET_UNIFORM_NAMES() const override
     {
         return
@@ -71,9 +76,10 @@ private:
             UNIFORM_CAMERA_VIEW_MAT,
             UNIFORM_CAMERA_PROJECTION_MAT,
             UNIFORM_VIEW_POSITION,
+            UNIFORM_LIGHT_DIRECTION,
             UNIFORM_DEPTH_BUFFER,
             UNIFORM_LIGHT_VIEW_MAT,
-            UNIFORM_LIGHT_PROJECTION_MAT
+            UNIFORM_LIGHT_PROJECTION_MAT,
         };
     }
 

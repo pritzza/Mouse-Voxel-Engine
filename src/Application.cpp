@@ -14,6 +14,8 @@
 
 #include "util/TexToImg.h"
 
+#include "gfx/ShadowMapping.h"
+
 Application::Application(
 	const std::string_view& name, 
 	int windowWidth, 
@@ -66,7 +68,7 @@ void Application::initializeObjects()
     const float fov = glm::radians(90.f);
     const float aspectRatio = (float)window.getWidth() / window.getHeight();
     const float nearPlane = 0.1f;
-    const float farPlane = 100.f;
+    const float farPlane = 200.f;
     
     camera.setProjectionMatrix(
         fov,
@@ -163,7 +165,7 @@ void Application::initializeObjects()
     }
 
     // making 64x32x64 terrain chunk
-    if (false)
+    if (true)
     {
         const glm::ivec3 chunkDim{ 256,64,256 };
         std::shared_ptr<VoxelGrid> chunk{ std::make_shared<VoxelGrid>(chunkDim) };
@@ -377,9 +379,9 @@ void Application::update()
         o.model = models.get(id);
         for (int i = 1; i <= 1; ++i)
         {
-            o.transform.setPosition(glm::vec3(0, -100 * i, 0));
+            o.transform.setPosition(glm::vec3(-256/2, -64 * i, -256/2));
             o.transform.update();
-            //sceneObjects.emplace_back(o);
+            sceneObjects.emplace_back(o);
         }
     }
 
@@ -453,14 +455,24 @@ void Application::update()
             FBO::bindDefault();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    
 
+            const glm::vec3 lightDirection{ 
+                glm::normalize( glm::vec3{glm::cos(currentTime/2), -2.0, glm::sin(currentTime/2)})
+            };
+
+            const glm::mat4 lightViewMat = ShadowMapping::createLightViewMatrix(lightDirection, camera);
+            const glm::mat4 lightProjMat = ShadowMapping::createLightProjectionMatrix(lightViewMat, camera);
+
             // update shader uniforms
             gl->mainPass.update(
-                camera.getViewMatrix(),
-                camera.getProjectionMatrix(),
+                lightViewMat,
+                lightProjMat,
+                //camera.getViewMatrix(),
+                //camera.getProjectionMatrix(),
                 camera.getPosition(),
+                lightDirection,
                 *gl->db.get(),
-                glm::mat4{ 1 }, // TODO pass light view matrix
-                glm::mat4{ 1 }  // TODO pass light perpsective matrix
+                lightViewMat,
+                lightProjMat
             );
         }
 

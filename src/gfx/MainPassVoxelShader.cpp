@@ -5,17 +5,22 @@
 void MainPassVoxelShader::update(
 	const glm::mat4& viewMat, 
 	const glm::mat4& projectionMat,
-	const glm::vec3& viewPos, 
+	const glm::vec3& viewPos,
+	const glm::vec3& lightDirection,
 	const FBO& depthBuffer,
 	const glm::mat4& lightViewMat,
 	const glm::mat4& lightProjectionMat)
 {
+	// TODO need more scaleable and organized way to do this- type check and such
+
 	use();
 
 	setViewMatrix(viewMat);
 	setProjectionMatrix(projectionMat);
 	
 	setViewPosition(viewPos);
+
+	setLightDirection(lightDirection);
 	
 	setDepthBuffer(depthBuffer);
 	setLightViewMatrix(lightViewMat);
@@ -45,6 +50,14 @@ void MainPassVoxelShader::setProjectionMatrix(const glm::mat4& projectionMat)
 	program.setUniformMat4(
 		UNIFORM_CAMERA_PROJECTION_MAT,
 		projectionMat
+	);
+}
+
+void MainPassVoxelShader::setLightDirection(const glm::vec3& lightDirection)
+{
+	program.setUniformVec3f(
+		UNIFORM_LIGHT_DIRECTION,
+		lightDirection
 	);
 }
 
