@@ -3,20 +3,23 @@
 #include "gl/FBO.h"
 
 void MainPassVoxelShader::update(
-	const glm::mat4& viewMat, 
-	const glm::mat4& projectionMat,
+	const glm::mat4& cameraViewMat,
+	const glm::mat4& cameraProjectionMat,
 	const glm::vec3& viewPos,
 	const glm::vec3& lightDirection,
 	const FBO& depthBuffer,
 	const glm::mat4& lightViewMat,
-	const glm::mat4& lightProjectionMat)
+	const glm::mat4& lightProjectionMat,
+	float nearPlane,
+	float farPlane
+	)
 {
 	// TODO need more scaleable and organized way to do this- type check and such
 
 	use();
 
-	setViewMatrix(viewMat);
-	setProjectionMatrix(projectionMat);
+	setViewMatrix(cameraViewMat);
+	setProjectionMatrix(cameraProjectionMat);
 	
 	setViewPosition(viewPos);
 
@@ -25,6 +28,9 @@ void MainPassVoxelShader::update(
 	setDepthBuffer(depthBuffer);
 	setLightViewMatrix(lightViewMat);
 	setLightProjectionMatrix(lightProjectionMat);
+
+	setNearPlane(nearPlane);
+	setFarPlane(farPlane);
 
 	unuse();
 }
@@ -89,5 +95,21 @@ void MainPassVoxelShader::setLightProjectionMatrix(const glm::mat4& lightProject
 	program.setUniformMat4(
 		UNIFORM_LIGHT_PROJECTION_MAT,
 		lightProjectionMat
+	);
+}
+
+void MainPassVoxelShader::setNearPlane(float near)
+{
+	program.setUniformf(
+		UNIFORM_NEAR_PLANE,
+		near
+	);
+}
+
+void MainPassVoxelShader::setFarPlane(float far)
+{
+	program.setUniformf(
+		UNIFORM_FAR_PLANE,
+		far
 	);
 }

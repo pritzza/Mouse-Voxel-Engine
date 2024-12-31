@@ -19,7 +19,9 @@ public:
         const glm::vec3& lightDirection,
         const FBO& depthBuffer,
         const glm::mat4& lightViewMat,
-        const glm::mat4& lightProjectionMat
+        const glm::mat4& lightProjectionMat,
+        float nearPlane,
+        float farPlane
     );
 
     void setModelMatrix(const glm::mat4& modelMat) const;
@@ -38,6 +40,9 @@ private:
     void setDepthBuffer(const FBO& depthBuffer);
     void setLightViewMatrix(const glm::mat4& lightViewMat);
     void setLightProjectionMatrix(const glm::mat4& lightProjectionMat);
+
+    void setNearPlane(float near);
+    void setFarPlane(float far);
 
 private:
     FilePath GET_VERTEX_SHADER_PATH() const override
@@ -68,6 +73,9 @@ private:
 
     static constexpr UniformName UNIFORM_LIGHT_DIRECTION{ "lightDirection" };
 
+    static constexpr UniformName UNIFORM_NEAR_PLANE{ "nearPlane" };
+    static constexpr UniformName UNIFORM_FAR_PLANE{ "farPlane" };
+
     const std::vector<UniformName> GET_UNIFORM_NAMES() const override
     {
         return
@@ -80,6 +88,8 @@ private:
             UNIFORM_DEPTH_BUFFER,
             UNIFORM_LIGHT_VIEW_MAT,
             UNIFORM_LIGHT_PROJECTION_MAT,
+            UNIFORM_NEAR_PLANE,
+            UNIFORM_FAR_PLANE
         };
     }
 

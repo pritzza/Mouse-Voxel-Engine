@@ -16,10 +16,14 @@ uniform mat4 cameraProjection;
 
 uniform vec3 viewPosition;
 
+uniform mat4 lightView;
+uniform mat4 lightProjection;
+
 out vec4 albedo;
 out vec3 normal;
 out float ao;
-out vec3 fragCoord;
+out vec4 fragPosCameraClipSpace;
+out vec4 fragPosLightClipSpace;
 
 bool backFaceCull = true;
 
@@ -153,6 +157,11 @@ vec4 cameraTransform(const vec3 pos)
 	return cameraProjection * cameraView * model * vec4(pos, 1.0);
 }
 
+vec4 lightTransform(const vec3 pos)
+{
+	return lightProjection * lightView * model * vec4(pos, 1.0);
+}
+
 /*	ao algo:
 
 	select one vertex from a face
@@ -215,20 +224,11 @@ void makeFace(const vec3 p, const vec3[4] vertices, const vec3 n)
 	{
 		int count = f(vertices[i], normal);
 		ao = float(count / 3.f);
-
-		//if (count == 0)
-		//	albedo = vec4(.5,.5,.5,1);
-		//if (count == 1)
-		//	albedo = vec4(1,0,0,1);
-		//if (count == 2)
-		//	albedo = vec4(0,1,0,1);
-		//if (count == 3)
-		//	albedo = vec4(0,0,1,1);
-		//if (count > 3)
-		//	albedo = vec4(1,1,1,1);
 		
-		gl_Position = cameraTransform(p + vertices[i]);
-		fragCoord = gl_Position.xyz;
+		fragPosLightClipSpace  = lightTransform (p + vertices[i]);
+		fragPosCameraClipSpace = cameraTransform(p + vertices[i]);
+
+		gl_Position = fragPosCameraClipSpace;
 		EmitVertex();
 	}
 	EndPrimitive();

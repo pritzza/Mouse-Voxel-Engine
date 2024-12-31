@@ -14,10 +14,18 @@
 glm::mat4 ShadowMapping::createLightViewMatrix(const glm::vec3& lightDir, const Camera& camera)
 {
     glm::vec3 lightPos = computeVirutalLightPosition(camera);
-
     glm::vec3 target = lightPos + lightDir;
 
-    return glm::lookAt(lightPos, target, camera.getUpDirection());
+    // Use a fixed up vector
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    // Handle edge cases where lightDir aligns with up
+    if (glm::abs(glm::dot(up, lightDir)) > 0.99f)
+    {
+        up = glm::vec3(1.0f, 0.0f, 0.0f); // Switch to a different axis
+    }
+
+    return glm::lookAt(lightPos, target, up);
 }
 
 glm::mat4 ShadowMapping::createLightProjectionMatrix(const glm::mat4& lightView, const Camera& camera)
@@ -31,10 +39,12 @@ glm::mat4 ShadowMapping::createLightProjectionMatrix(const glm::mat4& lightView,
     const glm::vec3 minBounds{ lsBoundingBox[0] };
     const glm::vec3 maxBounds{ lsBoundingBox[1] };
 
+    constexpr float DEPTH_MARGIN{ 0.1f };
+
     return glm::ortho(
         minBounds.x, maxBounds.x,   // left, right
         minBounds.y, maxBounds.y,   // bottom, top
-        minBounds.z, maxBounds.z    // near, far
+        minBounds.z - DEPTH_MARGIN, maxBounds.z + DEPTH_MARGIN    // near, far
     );
 }
 

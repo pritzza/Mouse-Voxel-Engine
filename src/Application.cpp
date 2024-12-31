@@ -16,6 +16,8 @@
 
 #include "gfx/ShadowMapping.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 Application::Application(
 	const std::string_view& name, 
 	int windowWidth, 
@@ -86,7 +88,7 @@ void Application::initializeObjects()
     gl->fbo = std::make_shared<FBO>(this->window.getWidth(), this->window.getHeight());
     gl->fbo->createTexture();
 
-    gl->db = std::make_shared<FBO>(this->window.getWidth(), this->window.getHeight());
+    gl->db = std::make_shared<FBO>(this->window.getWidth() *4, this->window.getHeight()*4);
     gl->db->createDepthBuffer();
 
     {
@@ -437,12 +439,15 @@ void Application::update()
     constexpr int MAIN_PASS{ 1 };
 
     const glm::vec3 lightDirection{ 
-        glm::normalize( glm::vec3{glm::cos(currentTime/2), -2.0, glm::sin(currentTime/2)})
+        glm::normalize( glm::vec3{glm::cos(1 * currentTime/2), -2.0, glm::sin(1 * currentTime/2)})
     };
 
     const glm::vec3 lightPos = ShadowMapping::computeVirutalLightPosition(camera);
-    const glm::mat4 lightViewMat = ShadowMapping::createLightViewMatrix(lightDirection, camera);
-    const glm::mat4 lightProjMat = ShadowMapping::createLightProjectionMatrix(lightViewMat, camera);
+     glm::mat4 lightViewMat = ShadowMapping::createLightViewMatrix(lightDirection, camera);
+     glm::mat4 lightProjMat = ShadowMapping::createLightProjectionMatrix(lightViewMat, camera);
+
+    //lightViewMat = glm::lookAt(glm::vec3(0, 10, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    //lightProjMat = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
 
     for (int pass = 0; pass < 2; pass++)
     {
@@ -465,13 +470,17 @@ void Application::update()
 
             // update shader uniforms
             gl->mainPass.update(
+                //lightViewMat,
+                //lightProjMat,
                 camera.getViewMatrix(),
                 camera.getProjectionMatrix(),
                 camera.getPosition(),
                 lightDirection,
                 *gl->db.get(),
                 lightViewMat,
-                lightProjMat
+                lightProjMat,
+                camera.getNearClippingPlane(),
+                camera.getFarClippingPlane()
             );
         }
 
@@ -488,7 +497,7 @@ void Application::update()
 
     
     // screenshot *roughly* once a second
-    if (static_cast<int>(this->currentTime * 10) % 10 == 0)
+    if (false && static_cast<int>(this->currentTime * 10) % 10 == 0)
     {
         std::string dbName{ "screenshots/depth/" + std::to_string((int)this) 
             + "_" + std::to_string(this->currentTime) + ".png" };
