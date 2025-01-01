@@ -18,6 +18,8 @@
 #include "gfx/VoxelRenderer.h"
 #include "gfx/VoxelObject.h"
 
+#include "gfx/Background.h"
+
 class FBO;
 
 class Application
@@ -52,6 +54,9 @@ public:
 
 	struct OpenGLStuff2
 	{
+		Background bg;
+
+		// todo, these shouldnt need to be smart ptrs, im just lazy
 		std::shared_ptr<FBO> fbo;
 		std::shared_ptr<FBO> db;
 

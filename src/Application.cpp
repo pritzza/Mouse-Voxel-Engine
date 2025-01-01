@@ -449,7 +449,12 @@ void Application::update()
      glm::mat4 lightProjMat = ShadowMapping::createLightProjectionMatrix(lightViewMat, camera);
 
     //lightViewMat = glm::lookAt(glm::vec3(0, 10, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    //lightProjMat = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+    
+    //const float oScale{ 0.1 };
+    //lightProjMat = glm::ortho(
+    //    -100.0f * oScale, 100.0f * oScale, 
+    //    -100.0f * oScale, 100.0f * oScale,
+    //    -100.0f , 100.0f);
 
     for (int pass = 0; pass < 2; pass++)
     {
@@ -470,7 +475,16 @@ void Application::update()
         else if (pass == MAIN_PASS) // regular pass pre render
         {
             FBO::bindDefault();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);    
+            glClear(GL_COLOR_BUFFER_BIT);    
+
+            gl->bg.draw(
+                currentTime,
+                camera.getForwardDirection(),
+                lightDirection,
+                camera.getProjectionMatrix()
+            );
+
+            glClear(GL_DEPTH_BUFFER_BIT);
 
             // update shader uniforms
             gl->mainPass.update(
