@@ -16,9 +16,8 @@ public:
 
     void draw(
         float currentTime,
-        const glm::vec3& viewDir,
         const glm::vec3& lightDir,
-        const glm::mat4& cameraProj
+        const glm::mat4& cameraProjView
     );
 
 private:
@@ -38,16 +37,14 @@ private:
 
     // camera transform
     static constexpr UniformName UNIFORM_TIME{ "time" };
-    static constexpr UniformName UNIFORM_VIEW_DIR{ "viewDir" };
     static constexpr UniformName UNIFORM_LIGHT_DIR{ "lightDir" };
-    static constexpr UniformName UNIFORM_CAMERA_PROJ{ "cameraProj" };
+    static constexpr UniformName UNIFORM_CAMERA_PROJ_VIEW{ "cameraProjView" };
 
     const std::vector<UniformName> UNIFORM_NAMES
     {
         UNIFORM_TIME,
-        UNIFORM_VIEW_DIR,
         UNIFORM_LIGHT_DIR,
-        UNIFORM_CAMERA_PROJ
+        UNIFORM_CAMERA_PROJ_VIEW
     };
 
     // Shader Attributes

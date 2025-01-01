@@ -19,17 +19,15 @@ Background::Background()
 
 void Background::draw(
 	float currentTime,
-	const glm::vec3& viewDir,
 	const glm::vec3& lightDir,
-	const glm::mat4& cameraProj
+	const glm::mat4& cameraProjView
 )
 {
 	shader.use();
 
 	shader.setUniformf(UNIFORM_TIME, currentTime);
-	shader.setUniformVec3f(UNIFORM_VIEW_DIR, viewDir);
 	shader.setUniformVec3f(UNIFORM_LIGHT_DIR, lightDir);
-	shader.setUniformMat4(UNIFORM_CAMERA_PROJ, cameraProj);
+	shader.setUniformMat4(UNIFORM_CAMERA_PROJ_VIEW, cameraProjView);
 
 	vao.bind();
 	

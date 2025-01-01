@@ -479,9 +479,8 @@ void Application::update()
 
             gl->bg.draw(
                 currentTime,
-                camera.getForwardDirection(),
                 lightDirection,
-                camera.getProjectionMatrix()
+                camera.getProjectionMatrix() * camera.getViewMatrix()
             );
 
             glClear(GL_DEPTH_BUFFER_BIT);
