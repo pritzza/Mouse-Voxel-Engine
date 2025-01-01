@@ -17,6 +17,7 @@ void VoxelModel::create(const std::shared_ptr<VoxelGrid>& voxels)
 
 	VoxelGrid& vg{ *voxelGrid.get() };
 
+	// TODO clean up/relocate/abstract compression logic
 	const std::vector<VoxelGraphicsData>& denseGraphicsData{ vg.getGraphicsData()};
 	const std::vector<SurroundingVoxels>& denseSurroundingData{ vg.getSurroundingData() };
 	const std::vector<glm::vec3>& densePositionData{ vg.getPositionData() };
@@ -95,6 +96,7 @@ void VoxelModel::updateBuffers()
 
 	VoxelGrid& vg{ *voxelGrid.get() };
 
+	// TODO clean up/relocate/abstract compression logic
 	const std::vector<VoxelGraphicsData>& denseGraphicsData{ vg.getGraphicsData()};
 	const std::vector<SurroundingVoxels>& denseSurroundingData{ vg.getSurroundingData() };
 	const std::vector<glm::vec3>& densePositionData{ vg.getPositionData() };
