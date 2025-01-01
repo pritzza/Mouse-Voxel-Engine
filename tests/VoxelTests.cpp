@@ -167,6 +167,15 @@ bool testFullySolid3x3x3()
         success = false;
     }
 
+    if (grid.getSurroundingData().at(27 / 2) != Voxel::DenselySurrounded)
+    {
+        std::cout << "error! Voxel at (1, 1, 1) should be densely surrounded, but isnt!\n" 
+            << "center voxel: " << grid.getSurroundingData().at(27 / 2) << '\n'
+            << "densely surrounded voxel: " << Voxel::DenselySurrounded << '\n';
+        
+        success = false;
+    }
+
     if (!success)
         grid.printSurroundingDebugInfo(false);
 

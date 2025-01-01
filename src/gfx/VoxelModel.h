@@ -25,16 +25,19 @@ public:
 	std::shared_ptr<VoxelGrid> getVoxelGrid() const { return voxelGrid; }
 
 private:
-	VAO vao;
+    std::shared_ptr<VoxelGrid> voxelGrid{ nullptr };
+	
+    VAO vao;
 	VBO* graphicsDataBuffer{ nullptr };
 	VBO* positionDataBuffer{ nullptr };
 	VBO* surroundingDataBuffer{ nullptr };
-	std::shared_ptr<VoxelGrid> voxelGrid;
 
 	bool instantiated{ false };
 	bool isGraphicsDataStale{ false };
 	bool isPositionDataStale{ false };
 	bool isSurroundingDataStale{ false };
+
+    bool uploadDataSparsely{ false };
 
 private:
 	void updateBuffers();

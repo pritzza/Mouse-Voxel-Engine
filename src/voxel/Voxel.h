@@ -85,6 +85,9 @@ struct Voxel
 		LeftTopBack			= 1 << 24,	// 24 : (-1,  1,  1)
 		CenterTopBack		= 1 << 25,	// 25 : ( 0,  1,  1)
 		RightTopBack		= 1 << 26,	// 26 : ( 1,  1,  1)
-		Primary = CenterCenterCenter
+		Primary = CenterCenterCenter,
+
+		// first 32 - 5 = 27 bits set
+		DenselySurrounded = (0xFFFFFFFF >> 5)
 	};
 };

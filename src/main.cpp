@@ -9,7 +9,7 @@ int main()
 
     Application::instantiateLibraries();
 
-    Application application{ "Mouse Voxel Engine", 1920/2 >> 0, 1080/2 >> 0 };
+    Application application{ "Mouse Voxel Engine", 1280, 720 };
 
     application.start();
 

@@ -88,7 +88,7 @@ void Application::initializeObjects()
     gl->fbo = std::make_shared<FBO>(this->window.getWidth(), this->window.getHeight());
     gl->fbo->createTexture();
 
-    gl->db = std::make_shared<FBO>(1 << 12, 1 << 12);
+    gl->db = std::make_shared<FBO>(1 << 13, 1 << 13);
     gl->db->createDepthBuffer();
 
     {
@@ -178,7 +178,7 @@ void Application::initializeObjects()
 
         int seed = 0;
         float frequency = 4;
-        float octaves = 4;
+        float octaves = 2;
         const siv::PerlinNoise perlin( seed );
         const double fx = (frequency / chunkDim.x);
         const double fz = (frequency / chunkDim.z);

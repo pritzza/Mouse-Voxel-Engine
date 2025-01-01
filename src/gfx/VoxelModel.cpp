@@ -2,6 +2,8 @@
 
 #include "VoxelShader.h"
 
+#include <iostream>
+
 VoxelModel::VoxelModel(const std::shared_ptr<VoxelGrid>& voxels)
 {
 	create(voxels);
@@ -15,9 +17,57 @@ void VoxelModel::create(const std::shared_ptr<VoxelGrid>& voxels)
 
 	VoxelGrid& vg{ *voxelGrid.get() };
 
-	vao.defineAttribute(vg.getPositionData(),	 VoxelModel::POSITION_ATTRIBUTE);
-	vao.defineAttribute(vg.getGraphicsData(),	 VoxelModel::COLOR_ATTRIBUTE);
-	vao.defineAttribute(vg.getSurroundingData(), VoxelModel::SURROUNDING_ATTRIBUTE);
+	const std::vector<VoxelGraphicsData>& denseGraphicsData{ vg.getGraphicsData()};
+	const std::vector<SurroundingVoxels>& denseSurroundingData{ vg.getSurroundingData() };
+	const std::vector<glm::vec3>& densePositionData{ vg.getPositionData() };
+
+	std::vector<VoxelGraphicsData>	sparseGraphicsData;
+	std::vector<SurroundingVoxels>  sparseSurroundingData;
+	std::vector<glm::vec3>			sparsePositionData;
+
+	if (uploadDataSparsely)
+	{
+		for (int i = 0; i < vg.getSize(); ++i)
+		{
+			const VoxelGraphicsData gd{ denseGraphicsData[i] };
+			const int surrounding{ denseSurroundingData[i] };
+
+			// conditions to not send a voxel to gpu
+			const bool empty{ vg.get(i).id == Voxel::ID::Null };
+			const bool fullyObscured{ surrounding == Voxel::DenselySurrounded };
+
+			if (!empty && !fullyObscured)
+			{
+				sparseGraphicsData.emplace_back(denseGraphicsData[i]);
+				sparseSurroundingData.emplace_back(denseSurroundingData[i]);
+				sparsePositionData.emplace_back(densePositionData[i]);
+			}
+		}
+
+		std::cout << sparseGraphicsData.size() << " vs " << denseGraphicsData.size() << '\n';
+	}
+
+	const std::vector<VoxelGraphicsData>* graphicsDataSource{ nullptr };
+	const std::vector<SurroundingVoxels>* surroundingDataSource{ nullptr };
+	const std::vector<glm::vec3>*		  positionDataSource{ nullptr };
+
+	if (uploadDataSparsely)
+	{
+		graphicsDataSource    = &sparseGraphicsData;
+		surroundingDataSource = &sparseSurroundingData;
+		positionDataSource    = &sparsePositionData;
+	}
+	else
+	{
+		graphicsDataSource    = &denseGraphicsData;
+		surroundingDataSource = &denseSurroundingData;
+		positionDataSource    = &densePositionData;
+	}
+
+
+	vao.defineAttribute(*positionDataSource, VoxelModel::POSITION_ATTRIBUTE);
+	vao.defineAttribute(*graphicsDataSource, VoxelModel::COLOR_ATTRIBUTE);
+	vao.defineAttribute(*surroundingDataSource, VoxelModel::SURROUNDING_ATTRIBUTE);
 
 	positionDataBuffer	  = &vao.getVBOs().at(VoxelModel::POSITION_ATTRIBUTE.location);
 	graphicsDataBuffer	  = &vao.getVBOs().at(VoxelModel::COLOR_ATTRIBUTE.location);
@@ -45,19 +95,62 @@ void VoxelModel::updateBuffers()
 
 	VoxelGrid& vg{ *voxelGrid.get() };
 
+	const std::vector<VoxelGraphicsData>& denseGraphicsData{ vg.getGraphicsData()};
+	const std::vector<SurroundingVoxels>& denseSurroundingData{ vg.getSurroundingData() };
+	const std::vector<glm::vec3>& densePositionData{ vg.getPositionData() };
+
+	std::vector<VoxelGraphicsData>	sparseGraphicsData;
+	std::vector<SurroundingVoxels>  sparseSurroundingData;
+	std::vector<glm::vec3>			sparsePositionData;
+
+	if (uploadDataSparsely)
+	{
+		for (int i = 0; i < vg.getSize(); ++i)
+		{
+			const int surrounding{ denseSurroundingData[i] };
+
+			// if a voxel has all of its neighbors, dont even send it to GPU
+			if (surrounding != Voxel::DenselySurrounded)
+			{
+				sparseGraphicsData.emplace_back(denseGraphicsData[i]);
+				sparseSurroundingData.emplace_back(denseSurroundingData[i]);
+				sparsePositionData.emplace_back(densePositionData[i]);
+			}
+		}
+
+		std::cout << sparseGraphicsData.size() << " vs " << denseGraphicsData.size() << '\n';
+	}
+
+	const std::vector<VoxelGraphicsData>* graphicsDataSource{ nullptr };
+	const std::vector<SurroundingVoxels>* surroundingDataSource{ nullptr };
+	const std::vector<glm::vec3>*		  positionDataSource{ nullptr };
+
+	if (uploadDataSparsely)
+	{
+		graphicsDataSource    = &sparseGraphicsData;
+		surroundingDataSource = &sparseSurroundingData;
+		positionDataSource    = &sparsePositionData;
+	}
+	else
+	{
+		graphicsDataSource    = &denseGraphicsData;
+		surroundingDataSource = &denseSurroundingData;
+		positionDataSource    = &densePositionData;
+	}
+
 	if (isGraphicsDataStale)
 	{
-		graphicsDataBuffer->updateBuffer(0, vg.getGraphicsData());
+		graphicsDataBuffer->updateBuffer(0, *graphicsDataSource);
 		isGraphicsDataStale = false;
 	}
 	if (isSurroundingDataStale)
 	{
-		surroundingDataBuffer->updateBuffer(0, vg.getSurroundingData());
+		surroundingDataBuffer->updateBuffer(0, *surroundingDataSource);
 		isSurroundingDataStale = false;
 	}
 	if (isPositionDataStale)
 	{
-		positionDataBuffer->updateBuffer(0, vg.getPositionData());
+		positionDataBuffer->updateBuffer(0, *positionDataSource);
 		isSurroundingDataStale = false;
 	}
 }
