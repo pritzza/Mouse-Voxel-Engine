@@ -4,9 +4,6 @@
 
 #include "../voxel/Voxel.h"
 
-typedef std::string_view FilePath;
-typedef std::string_view UniformName;
-
 class VoxelShader
 {
 public:
@@ -34,7 +31,7 @@ protected:
 	}
 
 protected:
-    virtual constexpr FilePath GET_VERTEX_SHADER_PATH() const = 0;
+    virtual constexpr FilePath GET_VERTEX_SHADER_PATH()   const = 0;
     virtual constexpr FilePath GET_GEOMETRY_SHADER_PATH() const = 0;
     virtual constexpr FilePath GET_FRAGMENT_SHADER_PATH() const = 0;
 

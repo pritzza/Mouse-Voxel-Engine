@@ -9,9 +9,9 @@
 #include "../../util/FileReader.h"
 
 ShaderProgram::ShaderProgram(
-    const std::string_view& vertexShaderPath, 
-    const std::optional<std::string_view>& geometryShaderPath,
-    const std::string_view& fragmentShaderPath, 
+    const FilePath& vertexShaderPath,
+    const std::optional<FilePath>& geometryShaderPath,
+    const FilePath& fragmentShaderPath,
     const std::vector<std::string_view>& uniformNames
 )
 {
@@ -29,9 +29,9 @@ ShaderProgram::~ShaderProgram()
 }
 
 void ShaderProgram::init(
-    const std::string_view& vertexShaderPath,
-    const std::optional<std::string_view>& geometryShaderPath,
-    const std::string_view& fragmentShaderPath, 
+    const FilePath& vertexShaderPath,
+    const std::optional<FilePath>& geometryShaderPath,
+    const FilePath& fragmentShaderPath,
     const std::vector<std::string_view>& uniformNames
 )
 {
@@ -85,23 +85,23 @@ void ShaderProgram::init(
     }
 }
 
-void ShaderProgram::setUniformf(const std::string_view& name, float value) const
+void ShaderProgram::setUniformf(const UniformName& name, float value) const
 {
     glUniform1f(uniforms.at(name), value);
 }
 
-void ShaderProgram::setUniformi(const std::string_view& name, int value) const
+void ShaderProgram::setUniformi(const UniformName& name, int value) const
 {
     glUniform1i(uniforms.at(name), value);
 }
 
-void ShaderProgram::setUniformVec3f(const std::string_view& name, const glm::vec3& v) const
+void ShaderProgram::setUniformVec3f(const UniformName& name, const glm::vec3& v) const
 {
     glUniform3fv(uniforms.at(name), 1, &v[0]);
 }
 
 void ShaderProgram::setUniformMat4(
-    const std::string_view& name, 
+    const UniformName& name,
     const glm::mat4& matrix
 ) const
 {
@@ -131,7 +131,7 @@ const GLuint ShaderProgram::get() const
 
 const GLuint ShaderProgram::createShader(
     const GLuint shaderType, 
-    const std::string_view& sourcePath
+    const FilePath& sourcePath
 ) const
 {
     // attempt to get contents of file at sourcePath
@@ -166,7 +166,7 @@ const GLuint ShaderProgram::createShader(
 void ShaderProgram::checkStatus(
     const GLuint statusType, 
     const GLuint id,
-    const std::string_view& name
+    const FilePath& name
 ) const
 {
     static int success;
@@ -195,7 +195,7 @@ void ShaderProgram::checkStatus(
     }
 }
 
-void ShaderProgram::findUniforms(const std::vector<std::string_view>& uniformNames)
+void ShaderProgram::findUniforms(const std::vector<UniformName>& uniformNames)
 {
     // find all uniforms
     for (const auto& uniformName : uniformNames)

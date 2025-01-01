@@ -9,6 +9,9 @@
 
 #include <glm/mat4x4.hpp>
 
+typedef std::string_view FilePath;
+typedef std::string_view UniformName;
+
 class ShaderProgram
 {
 private:
@@ -17,30 +20,30 @@ private:
 
 private:
 	GLuint handle{ NULL_HANDLE };
-	std::unordered_map<std::string_view, GLint> uniforms;
+	std::unordered_map<UniformName, GLint> uniforms;
 
 public:
 	ShaderProgram() = default;
 	ShaderProgram(
-		const std::string_view& vertexShaderPath,
-		const std::optional<std::string_view>& geometryShaderPath,
-		const std::string_view& fragmentShaderPath,
-		const std::vector<std::string_view>& uniformNames
+		const FilePath& vertexShaderPath,
+		const std::optional<FilePath>& geometryShaderPath,
+		const FilePath& fragmentShaderPath,
+		const std::vector<UniformName>& uniformNames
 	);
 
 	~ShaderProgram();
 
 	void init(
-		const std::string_view& vertexShaderPath,
-		const std::optional<std::string_view>& geometryShaderPath,
-		const std::string_view& fragmentShaderPath,
-		const std::vector<std::string_view>& uniformNames
+		const FilePath& vertexShaderPath,
+		const std::optional<FilePath>& geometryShaderPath,
+		const FilePath& fragmentShaderPath,
+		const std::vector<UniformName>& uniformNames
 	);
 
-	void setUniformf(const std::string_view& name, float value) const;
-	void setUniformi(const std::string_view& name, int value) const;
-	void setUniformVec3f(const std::string_view& name, const glm::vec3& v) const;
-	void setUniformMat4(const std::string_view& name, const glm::mat4& matrix) const;
+	void setUniformf(const UniformName& name, float value) const;
+	void setUniformi(const UniformName& name, int value) const;
+	void setUniformVec3f(const UniformName& name, const glm::vec3& v) const;
+	void setUniformMat4(const UniformName& name, const glm::mat4& matrix) const;
 
 	void use() const;
 	void unuse() const;	// great name lol
@@ -53,15 +56,15 @@ private:
 
 	const GLuint createShader(
 		GLuint shaderType, 
-		const std::string_view& sourcePath
+		const FilePath& sourcePath
 	) const;
 
 	void checkStatus(
 		GLuint statusType, 
 		GLuint handle, 
-		const std::string_view& name
+		const FilePath& name
 	) const;
 
-	void findUniforms(const std::vector<std::string_view>& uniformNames);
+	void findUniforms(const std::vector<UniformName>& uniformNames);
 
 };
