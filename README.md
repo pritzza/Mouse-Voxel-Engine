@@ -8,16 +8,17 @@ In the future I intend to make a serious real time voxel
 rendering engine however, but until then, this is my sandbox.
 
 Complete Features:
-- Creating and rendering contents of any arbitrary size voxel spaces
-- Phong reflection model
-- Controllable camera
+- Creating and rendering arbitrary voxel models
+- Realtime shadow mapping
+- Ambient occlusion
 
 Features In Development:
 - Voxel Editor
 
 Planned Features:
-- Saving and loading voxel spaces from disk
-- Greedy Meshing
-- Ambient Occlusion
+- Pivot from geometry shader to GPU raymarching and maybe CPU greedy meshing
+- Smarter geometry representation
+- Better materials (PBR, reflection, refraction)
+- Volumetric Rendering
 
 [Watch An Early Demo](https://www.youtube.com/watch?v=CbnBtSy00Q8)

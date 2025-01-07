@@ -89,7 +89,7 @@ void main()
 
 	float shadow = shadowCalculation(fragPosLightClipSpace);
 
-	vec3 regularColoring = ao * (ambient + (1.0 - shadow) * diffuse) * vec3(albedo);
+	vec3 regularColoring = (ao * ambient + (1.0 - shadow) * diffuse) * vec3(albedo);
 
 	FragColor = vec4(regularColoring, 1.0);
 }

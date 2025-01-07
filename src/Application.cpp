@@ -67,7 +67,7 @@ void Application::stop()
 void Application::initializeObjects()
 {
     /// initializing camera
-    const float fov = glm::radians(50.f);
+    const float fov = glm::radians(90.f);
     const float aspectRatio = (float)window.getWidth() / window.getHeight();
     const float nearPlane = 0.1f;
     const float farPlane = 150.f;
@@ -441,7 +441,7 @@ void Application::update()
     constexpr int MAIN_PASS{ 1 };
 
     const glm::vec3 lightDirection{ 
-        glm::normalize( glm::vec3{glm::cos(1 * currentTime/2), -2.0, glm::sin(1 * currentTime/2 + 1)})
+        glm::normalize( glm::vec3{glm::cos(1 * currentTime/2), -(glm::sin(currentTime/4) + 1)/2, glm::sin(1 * currentTime / 3 + 1)})
     };
 
     const glm::vec3 lightPos = ShadowMapping::computeVirutalLightPosition(camera);
